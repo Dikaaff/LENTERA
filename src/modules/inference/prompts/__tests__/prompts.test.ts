@@ -58,6 +58,10 @@ describe("cloud artifacts", () => {
     expect(cluster.SYSTEM_PROMPT).toContain("below 0.6");
   });
 
+  it("cluster META is defined", () => {
+    expect(cluster.META).toBeDefined();
+  });
+
   it("daily SITREP prompt enforces the word cap and source IDs", () => {
     const prompt = daily.buildUserPrompt([], {});
     expect(daily.SYSTEM_PROMPT).toContain("Maximum 250 words");
@@ -67,7 +71,7 @@ describe("cloud artifacts", () => {
 
   it("uses temperature 0.3 only for the narrative", () => {
     expect(extract.meta.sampling.temperature).toBe(0);
-    expect(cluster.meta.sampling.temperature).toBe(0);
+    expect(cluster.META.sampling?.temperature).toBe(0);
     expect(daily.meta.sampling.temperature).toBe(0.3);
   });
 });

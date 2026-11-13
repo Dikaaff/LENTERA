@@ -24,21 +24,18 @@ State: **DEPLOYED — CLOUD MEASURED — LIVE SAVE VERIFIED**
    The live save used the manual fallback (`JALUR: MANUAL`).
 2. **No App Check enforcement.** AI Logic answered without it; the reCAPTCHA
    Enterprise site key is still unset.
-3. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
-   numbers.
-4. **Prompt gaps found by measurement:** `missing-regency` returns `high`
-   confidence instead of `low` (3/3), and `extreme-numbers` is accepted as a
-   report (3/3).
-5. **Coordinator docs are not seeded.** Needs a Google-signed-in uid.
+3. **Coordinator docs are not seeded.** Needs a Google-signed-in uid.
+
+## Fixed gaps
+
+- `missing-regency` now returns `confidence: low` (3/3) via schema `.transform()`.
+- `extreme-numbers` now flags `note_anomaly` and caps people/quantity at 100k.
 
 ## Exact next action
 
 1. Optionally enforce App Check (reCAPTCHA Enterprise) and seed
    `coordinators/{uid}` with a region.
-2. Fix the two prompt/validation gaps, then rerun
-   `MEASURE_CONFIRM=1 MEASURE_PACE_MS=5000 npm run measure:cloud`.
-3. Measure `sitrep.cluster.v1` and `sitrep.daily.v1`.
-4. Repeat the extraction path on Chrome 139+ with Nano and record local
+2. Repeat the extraction path on Chrome 139+ with Nano and record local
    latency/source.
 
 ## Session 4 add-on (admin + modern UI)

@@ -40,6 +40,30 @@ describe("extractionSchema", () => {
     });
     expect(parsed.people_affected).toEqual({ min: 30, max: 45 });
   });
+
+  it("forces low confidence when a named place has no regency", () => {
+    const parsed = extractionSchema.parse({
+      ...valid,
+      location: { name: "Desa Cibeureum", regency: null, confidence: "high" },
+    });
+    expect(parsed.location?.confidence).toBe("low");
+  });
+
+  it("rejects an implausible people count", () => {
+    expect(
+      extractionSchema.safeParse({ ...valid, people_affected: { min: 1_200_000, max: 1_200_000 } })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejects an implausible need quantity", () => {
+    expect(
+      extractionSchema.safeParse({
+        ...valid,
+        needs: [{ item: "air bersih", quantity: 999_999, unit: "liter" }],
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe("reportRecordSchema", () => {

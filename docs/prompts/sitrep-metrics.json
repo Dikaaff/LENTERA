@@ -1,0 +1,582 @@
+{
+  "status": "measured",
+  "measuredAt": "2026-11-13T11:55:14.756Z",
+  "url": "http://localhost:5173/",
+  "model": "gemini-3.5-flash-lite (ONLY_IN_CLOUD)",
+  "runsPerTask": 3,
+  "paceMs": 2000,
+  "fixture": {
+    "reports": 5,
+    "ids": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "expectedDuplicateIds": [
+      "r1",
+      "r2",
+      "r4"
+    ]
+  },
+  "summary": {
+    "cluster": {
+      "label": "sitrep.cluster.v1",
+      "runs": 3,
+      "ok": 3,
+      "schemaValidRate": 1,
+      "allChecksPassRate": 1,
+      "avgWordCount": null,
+      "unsupportedNumberRuns": 0,
+      "avgLatencyMs": 5068,
+      "failures": []
+    },
+    "daily": {
+      "label": "sitrep.daily.v1",
+      "runs": 3,
+      "ok": 3,
+      "schemaValidRate": 1,
+      "allChecksPassRate": 1,
+      "avgWordCount": 69,
+      "unsupportedNumberRuns": 0,
+      "avgLatencyMs": 5324,
+      "failures": []
+    }
+  },
+  "clusterRuns": [
+    {
+      "run": 1,
+      "status": "ok",
+      "checks": {
+        "accounted": true,
+        "sameIncident": true,
+        "separateNeed": true,
+        "unresolvedEmpty": true,
+        "noInventedIds": true
+      },
+      "latencyMs": 3259,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 3253,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "run": 2,
+      "status": "ok",
+      "checks": {
+        "accounted": true,
+        "sameIncident": true,
+        "separateNeed": true,
+        "unresolvedEmpty": true,
+        "noInventedIds": true
+      },
+      "latencyMs": 3941,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 3937,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "run": 3,
+      "status": "ok",
+      "checks": {
+        "accounted": true,
+        "sameIncident": true,
+        "separateNeed": true,
+        "unresolvedEmpty": true,
+        "noInventedIds": true
+      },
+      "latencyMs": 8005,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 8002,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    }
+  ],
+  "dailyRuns": [
+    {
+      "run": 1,
+      "status": "ok",
+      "checks": {
+        "ordered": true,
+        "allHeadings": true,
+        "sourced": true,
+        "knownSources": true,
+        "wordCount": 75,
+        "withinWordLimit": true,
+        "unsupportedNumbers": []
+      },
+      "latencyMs": 6211,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 6209,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "run": 2,
+      "status": "ok",
+      "checks": {
+        "ordered": true,
+        "allHeadings": true,
+        "sourced": true,
+        "knownSources": true,
+        "wordCount": 72,
+        "withinWordLimit": true,
+        "unsupportedNumbers": []
+      },
+      "latencyMs": 2856,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 2853,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "run": 3,
+      "status": "ok",
+      "checks": {
+        "ordered": true,
+        "allHeadings": true,
+        "sourced": true,
+        "knownSources": true,
+        "wordCount": 61,
+        "withinWordLimit": true,
+        "unsupportedNumbers": []
+      },
+      "latencyMs": 6904,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 6900,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    }
+  ],
+  "results": [
+    {
+      "task": "sitrep.cluster.v1",
+      "run": 1,
+      "status": "ok",
+      "data": {
+        "clusters": [
+          {
+            "canonical_id": "r1",
+            "duplicate_ids": [
+              "r2",
+              "r4"
+            ],
+            "confidence": 0.95,
+            "reason": "Laporan r1, r2, dan r4 merujuk pada lokasi yang sama yaitu Balai Desa Sukamaju dengan jumlah pengungsi dan kebutuhan yang serupa akibat banjir."
+          }
+        ],
+        "unresolved_ids": [
+          "r3",
+          "r5"
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 3253,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 3259,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 3253,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "task": "sitrep.cluster.v1",
+      "run": 2,
+      "status": "ok",
+      "data": {
+        "clusters": [
+          {
+            "canonical_id": "r1",
+            "duplicate_ids": [
+              "r2",
+              "r4"
+            ],
+            "confidence": 0.95,
+            "reason": "Laporan-laporan ini menyebutkan kejadian banjir yang sama dan kebutuhan pengungsi di Balai Desa Sukamaju dengan jumlah jiwa yang hampir sama."
+          }
+        ],
+        "unresolved_ids": [
+          "r3",
+          "r5"
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 3937,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 3941,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 3937,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "task": "sitrep.cluster.v1",
+      "run": 3,
+      "status": "ok",
+      "data": {
+        "clusters": [
+          {
+            "canonical_id": "r1",
+            "duplicate_ids": [
+              "r2",
+              "r4"
+            ],
+            "confidence": 0.95,
+            "reason": "Laporan r1, r2, dan r4 merujuk pada lokasi yang sama yaitu Balai Desa Sukamaju dengan jumlah pengungsi dan kebutuhan yang sangat mirip terkait banjir."
+          }
+        ],
+        "unresolved_ids": [
+          "r3",
+          "r5"
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 8002,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 8005,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 8002,
+        "artifact": "sitrep.cluster.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "task": "sitrep.daily.v1",
+      "run": 1,
+      "status": "ok",
+      "data": {
+        "sections": [
+          {
+            "heading": "overview",
+            "claims": [
+              {
+                "text": "Terdapat total 5 laporan yang diterima di wilayah Jawa Barat terkait berbagai situasi darurat.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r3",
+                  "r4",
+                  "r5"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "most_urgent",
+            "claims": [
+              {
+                "text": "Situasi paling mendesak terjadi di Balai Desa Sukamaju, Bandung, akibat banjir yang merendam dan membutuhkan pasokan selimut segera.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "affected",
+            "claims": [
+              {
+                "text": "Sebanyak 30 hingga 32 keluarga mengungsi di Balai Desa Sukamaju, Bandung.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "gaps",
+            "claims": [
+              {
+                "text": "Desa Cibeureum membutuhkan pasokan 500 liter air bersih, namun detail lokasi dan data penduduk terdampak masih minim.",
+                "source_ids": [
+                  "r3"
+                ]
+              },
+              {
+                "text": "Terdapat laporan masuk di Jawa Barat yang tidak memiliki detail lokasi atau kebutuhan yang spesifik.",
+                "source_ids": [
+                  "r5"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 6209,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 6211,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 6209,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "task": "sitrep.daily.v1",
+      "run": 2,
+      "status": "ok",
+      "data": {
+        "sections": [
+          {
+            "heading": "overview",
+            "claims": [
+              {
+                "text": "Terdapat total 5 laporan yang masuk dari wilayah Jawa Barat.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r3",
+                  "r4",
+                  "r5"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "most_urgent",
+            "claims": [
+              {
+                "text": "Balai Desa Sukamaju di Bandung mengalami banjir dengan status darurat kritis hingga tinggi, menuntut evakuasi dan kebutuhan mendesak seperti selimut.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "affected",
+            "claims": [
+              {
+                "text": "Sekitar 30 hingga 32 keluarga mengungsi di Balai Desa Sukamaju akibat banjir.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "gaps",
+            "claims": [
+              {
+                "text": "Desa Cibeureum membutuhkan bantuan air bersih sebanyak 500 liter namun data lokasi dan pengungsi masih kurang.",
+                "source_ids": [
+                  "r3"
+                ]
+              },
+              {
+                "text": "Terdapat laporan dari Jawa Barat yang tidak menyertakan detail lokasi maupun kebutuhan secara spesifik.",
+                "source_ids": [
+                  "r5"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 2853,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 2856,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 2853,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    },
+    {
+      "task": "sitrep.daily.v1",
+      "run": 3,
+      "status": "ok",
+      "data": {
+        "sections": [
+          {
+            "heading": "overview",
+            "claims": [
+              {
+                "text": "Terdapat 5 total laporan yang diterima dari wilayah Jawa Barat dengan tingkat urgensi yang bervariasi.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r3",
+                  "r4",
+                  "r5"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "most_urgent",
+            "claims": [
+              {
+                "text": "Sebanyak 32 keluarga mengungsi di Balai Desa Sukamaju akibat banjir dan membutuhkan bantuan mendesak berupa selimut.",
+                "source_ids": [
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "affected",
+            "claims": [
+              {
+                "text": "Sebanyak 30 hingga 32 keluarga mengungsi di Balai Desa Sukamaju, Bandung.",
+                "source_ids": [
+                  "r1",
+                  "r2",
+                  "r4"
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "gaps",
+            "claims": [
+              {
+                "text": "Desa Cibeureum membutuhkan pasokan air bersih sebanyak 500 liter, namun informasi lokasi detail masih memiliki tingkat kepercayaan yang rendah.",
+                "source_ids": [
+                  "r3"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "error": null,
+      "meta": {
+        "path": "cloud",
+        "durationMs": 6900,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      },
+      "wallMs": 6904,
+      "confidenceSampleRingout": null,
+      "confidenceTs": null,
+      "cachedMeta": {
+        "path": "cloud",
+        "durationMs": 6900,
+        "artifact": "sitrep.daily.v1",
+        "version": "1.0.0",
+        "reason": "Pengguna memilih pemrosesan cloud.",
+        "inferenceSource": "in_cloud",
+        "retried": false
+      }
+    }
+  ]
+}

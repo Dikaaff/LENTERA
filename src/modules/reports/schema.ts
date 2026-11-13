@@ -3,15 +3,25 @@ import { CATEGORIES, CONFIDENCES, REPORT_STATUSES, URGENCIES } from "./types";
 
 const nullableText = z.string().min(1).max(600).nullable();
 
-export const locationSchema = z.strictObject({
-  name: nullableText,
-  regency: nullableText,
-  confidence: z.enum(CONFIDENCES),
-});
+// One field report is local by scope. Larger claims need a human, not silent acceptance.
+export const MAX_PEOPLE_PER_REPORT = 100_000;
+export const MAX_NEED_QUANTITY = 100_000;
+
+export const locationSchema = z
+  .strictObject({
+    name: nullableText,
+    regency: nullableText,
+    confidence: z.enum(CONFIDENCES),
+  })
+  .transform((value) =>
+    value.name && !value.regency && value.confidence !== "low"
+      ? { ...value, confidence: "low" as const }
+      : value,
+  );
 
 export const needSchema = z.strictObject({
   item: z.string().min(1).max(120),
-  quantity: z.number().nonnegative().nullable(),
+  quantity: z.number().nonnegative().max(MAX_NEED_QUANTITY).nullable(),
   unit: z.string().max(40).nullable(),
 });
 
@@ -23,8 +33,8 @@ export const extractionSchema = z.strictObject({
   location: locationSchema.nullable().optional().default(null),
   people_affected: z
     .strictObject({
-      min: z.number().int().nonnegative().nullable(),
-      max: z.number().int().nonnegative().nullable(),
+      min: z.number().int().nonnegative().max(MAX_PEOPLE_PER_REPORT).nullable(),
+      max: z.number().int().nonnegative().max(MAX_PEOPLE_PER_REPORT).nullable(),
     })
     .nullable()
     .optional()
@@ -107,8 +117,8 @@ export const extractionJsonSchema = {
     people_affected: {
       type: ["object", "null"],
       properties: {
-        min: { type: ["integer", "null"] },
-        max: { type: ["integer", "null"] },
+        min: { type: ["integer", "null"], maximum: MAX_PEOPLE_PER_REPORT },
+        max: { type: ["integer", "null"], maximum: MAX_PEOPLE_PER_REPORT },
       },
       required: ["min", "max"],
     },
@@ -118,7 +128,7 @@ export const extractionJsonSchema = {
         type: "object",
         properties: {
           item: { type: "string" },
-          quantity: { type: ["number", "null"] },
+          quantity: { type: ["number", "null"], maximum: MAX_NEED_QUANTITY },
           unit: { type: ["string", "null"] },
         },
         required: ["item", "quantity", "unit"],

@@ -120,8 +120,8 @@ push. Future pushes use the same remote and fail loudly if credentials expire.
 - [~] Typecheck lolos via transpile pemeriksaan cepat; TSc full masih lambat.
 - [ ] Bangun & deploy ulang dengan site key App Check. Uji token client.
 - [ ] Set Firestore ENFORCED.
-- [ ] Jalankan SITREP measurement.
-- [ ] Jalankan cloud measurement ulang setelah fix schema/prompt.
+- [x] SITREP measurement selesai: 3/3 cluster + 3/3 daily OK, schema valid 100%, semua klaim bersumber. `docs/prompts/sitrep-metrics.json`.
+- [x] Cloud measurement ulang setelah fix schema/prompt: 35/36 OK (1 rate-limited 429), schema valid 100%, field accuracy 0.9583 (23/24), avg 2577ms, p95 4860ms. `missing-regency` sekarang `confidence: low` (3/3), `extreme-numbers` dapat `note_anomaly` (3/3). `docs/prompts/cloud-metrics.json`.
 
 ## Live verification (session 3)
 

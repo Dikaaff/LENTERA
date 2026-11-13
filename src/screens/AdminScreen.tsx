@@ -6,7 +6,6 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/field";
 import { useHeldCount, useReports } from "@/modules/queue";
 import { regions } from "@/modules/map/geometry";
-import { type ClusterResult } from "@/modules/reports";
 
 const HEADING: Record<string, string> = {
   overview: "Ringkasan",
@@ -49,12 +48,12 @@ const TRACK_LIST = [
 ];
 
 export function AdminScreen() {
-  const reports = useReports();
   const held = useHeldCount();
   const [sector, setSector] = useState<Record<string, unknown> | null>(null);
   const [zone, setZone] = useState(regions[0]?.name ?? "");
   const [sectorFilter, setSectorFilter] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const reports = useReports();
 
   const verifyCluster = (expected: ("r1" | "r2" | "r4")[]) => {
     const ids = cluster?.clusters ?? [];
@@ -97,7 +96,6 @@ export function AdminScreen() {
         </div>
         <Badge tone="amber">koordinator</Badge>
       </header>
-
       <section className="grid grid-cols-2 gap-3">
         <Card>
           <CardBody className="space-y-1">
@@ -114,7 +112,6 @@ export function AdminScreen() {
           </CardBody>
         </Card>
       </section>
-
       <Card className="border-amber/30">
         <CardBody className="space-y-4">
           <div className="flex items-center gap-2">
@@ -173,7 +170,6 @@ export function AdminScreen() {
           </Button>
         </CardBody>
       </Card>
-
       {reviewResult && (
         <Card className="border-line">
           <CardBody className="space-y-4">
@@ -239,8 +235,7 @@ export function AdminScreen() {
             </div>
           </CardBody>
         </Card>
-      )}
-
+      )}{" "}
       {sector && (
         <Card className="border-amber/20">
           <CardBody className="space-y-3">
