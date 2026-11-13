@@ -20,9 +20,10 @@
 
 ## What was cut
 
-- Live model metrics. No Firebase project or Nano device in the session.
-- Nothing from the data layer was cut: the emulator suite now covers rules and
-  sync. The remaining cut is live AI quality, which needs a real project.
+- Local (Nano) model metrics. No Nano-capable device in the session. Cloud
+  extraction was measured after the project was attached: 36/36 calls, 87.5%
+  field accuracy. Dedup and SITREP narrative remain unmeasured.
+- Nothing from the data layer was cut: the emulator suite covers rules and sync.
 - Regency-level geometry. Province-level keeps the bundle at 336 KB and the map
   useful offline.
 - Coordinator onboarding UI. Google sign-in exists; seeding
@@ -46,7 +47,9 @@
 
 Code-level items (build, typecheck, tests, boundaries, schema validation,
 offline queue, export, consent, masking) are done. Data and rules are verified
-end-to-end against the emulator, including cross-volunteer denial. Live AI items
-(cloud extraction, local extraction, dedup confidence, SITREP narrative,
-zero-request Network proof, Nano download) remain **unverified** because no
-project or capable device exists in this environment. The README says so.
+end-to-end against the emulator, including cross-volunteer denial. Cloud
+extraction is measured (36/36, 87.5% field accuracy) and rules + Hosting are
+deployed. Still **unverified**: local extraction, dedup confidence, SITREP
+narrative, zero-request Network proof, and Nano download, because no
+Nano-capable device exists in this environment. Anonymous Auth also awaits the
+console step. The README says so.

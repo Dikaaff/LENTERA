@@ -4,19 +4,22 @@ Date: 2026-11-13.
 
 ## Commands actually run
 
-| Command                         | Result                                | Evidence                                  |
-| ------------------------------- | ------------------------------------- | ----------------------------------------- |
-| `npm run typecheck`             | pass, 0 errors                        | exit 0                                    |
-| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output                             |
-| `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest               |
-| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser                        |
-| `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                                   |
-| `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                                  |
-| emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`                 |
-| `node scripts/e2e-resume.mjs`   | queued report synced after reload     | `docs/evidence/e2e-resume.png`            |
-| hosting emulator                | `/antrean` 200; SPA shell served      | `/tmp/hosting2.log`                       |
-| `npm run measure:cloud`         | blocked, exit 2, no real project      | `docs/prompts/cloud-metrics.blocked.json` |
-| `firebase deploy`               | blocked, exit 1, not authenticated    | `docs/evidence/deploy-blocked.txt`        |
+| Command                         | Result                                | Evidence                          |
+| ------------------------------- | ------------------------------------- | --------------------------------- |
+| `npm run typecheck`             | pass, 0 errors                        | exit 0                            |
+| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output                     |
+| `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest       |
+| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser                |
+| `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                           |
+| `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                          |
+| emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`         |
+| `node scripts/e2e-resume.mjs`   | queued report synced after reload     | `docs/evidence/e2e-resume.png`    |
+| hosting emulator                | `/antrean` 200; SPA shell served      | `/tmp/hosting2.log`               |
+| `npm run measure:cloud`         | 36/36 ok; schema 1.0; accuracy 0.875  | `docs/prompts/cloud-metrics.json` |
+| `bash scripts/deploy.sh <id>`   | exit 0; rules + hosting released      | `/tmp/deploy-real.log`            |
+| live URL smoke                  | `/` and `/antrean` HTTP 200           | `docs/evidence/deploy-live.png`   |
+| live security headers           | all configured headers present        | `curl -I` output                  |
+| live anonymous sign-in          | failed: `CONFIGURATION_NOT_FOUND`     | Auth not initialized              |
 
 ## What the tests cover
 
@@ -71,33 +74,50 @@ boot.
 5. **PII:** masking is regex-based. Nicknames without a label, or names written
    in lowercase, can slip through. Documented limitation; consent gate remains.
 
-## Cloud measurement and deploy attempts
+## Cloud measurement
 
 - `scripts/measure-cloud.mjs` drives the real `runTask` in the page with
   `forceCloud` and 3 runs per case, then writes
   `docs/prompts/cloud-metrics.json`. It refuses to run without
   `MEASURE_CONFIRM=1`.
-- It exited **2** here: the dev server is in emulator mode and the only project
-  id is `lentera-demo`. The reason is recorded in
-  `docs/prompts/cloud-metrics.blocked.json`; no metric was invented.
-- `scripts/deploy.sh` refuses the demo project and stale emulator flags. Both
-  guards return exit 2.
-- Hosting emulator served `/antrean` with HTTP 200 and the SPA shell, so the
-  rewrite is valid. It does **not** emit the configured security headers, so
-  those remain unverified until real Hosting.
+- First run hit HTTP 429 on 19/36 calls (free tier: 15 requests/minute). The
+  successful, paced rerun (`MEASURE_PACE_MS=5000`) produced 36/36 ok, schema
+  valid 1.0, field accuracy 0.875 (21/24), average 2,603 ms, p95 6,033 ms, all
+  `in_cloud`. It is recorded in `docs/prompts/cloud-metrics.json`.
+- Only mismatch: `missing-regency` returned `confidence: high` instead of `low`
+  in 3/3 runs. `extreme-numbers` was accepted as a report in 3/3 runs although
+  the fixture expects rejection. Both are prompt/validation gaps, not transport
+  or schema failures.
+
+## Deploy
+
+- `bash scripts/deploy.sh lentera-6f2a-db3a1` exited 0 and released Firestore
+  rules and Hosting.
+- Live URL <https://lentera-6f2a-db3a1.web.app>: `/` and `/antrean` return 200.
+- Live headers include `X-Content-Type-Options: nosniff`, `X-Frame-Options:
+DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy:
+camera=(self), microphone=(), geolocation=()`, and HSTS.
+- The live bundle carries project `lentera-6f2a-db3a1`.
+- Deploy guards still reject `lentera-demo`, emulator flags, and a mismatched
+  `.env.local` (exit 2).
 
 ## Not verified
 
-- No live model call (cloud or Nano), therefore no accuracy, A/B, latency, or
-  Network-tab zero-request evidence. The harness is ready but blocked.
-- No Nano download screenshot; no Chrome 139+ profile.
+- **Anonymous Auth is inactive on the live project.** `initializeAuth` returns
+  `BILLING_NOT_ENABLED` on Spark, and client sign-in returns
+  `CONFIGURATION_NOT_FOUND`. The live app therefore stays `TAMU`; a saved report
+  reaching `terkirim` on the live domain is **not** verified. Console
+  Authentication → Get started is the next step.
+- No Nano call or screenshot; no Chrome 139+ profile.
 - No two-device conflict reproduction; conflict logic is unit-tested only.
-- No Firebase deployment: `firebase deploy` exits 1 with
-  "Failed to authenticate". No reCAPTCHA Enterprise enforcement.
-- Hosting security headers are configured but not observable in the emulator.
+- No reCAPTCHA Enterprise site key or App Check enforcement. AI Logic answered
+  without App Check, so this is not currently blocking cloud calls.
+- `sitrep.cluster.v1` and `sitrep.daily.v1` are still unmeasured.
 
 ## Gate status
 
 Data, queue, rules, and the manual fallback are verified end-to-end against the
-emulator. The AI-quality gate is **not** complete until a Firebase project and a
-Nano-capable Chrome are attached.
+emulator. Extraction is measured on cloud at 87.5% field accuracy, below the
+90% bar for automatic wiring, so edits stay mandatory. Auth must be initialized
+before the live write path can be called complete; the on-device half remains
+unmeasured without Nano.

@@ -1,7 +1,8 @@
 # Security evidence
 
-Date: 2026-11-13. No Firebase project was attached to this session, so this file
-separates verified local behavior from deployment steps that remain.
+Date: 2026-11-13. Rules and Hosting are deployed to `lentera-6f2a-db3a1`
+(<https://lentera-6f2a-db3a1.web.app>). This file separates verified behavior
+from steps that remain, notably Authentication and App Check.
 
 ## Layer 1 — Identity and authorization
 
@@ -30,9 +31,14 @@ separates verified local behavior from deployment steps that remain.
 
 - App Check: debug provider behind `VITE_APP_CHECK_DEBUG=1`; production path is
   reCAPTCHA Enterprise (`VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`).
+- **App Check is not enforced yet.** No reCAPTCHA Enterprise site key is set.
+  AI Logic answered 36/36 cloud calls without an App Check token, so the current
+  project is not protected by attestation. This is a deployment gap, not a
+  verified control.
 - Client rate limiting: not implemented. The queue is user-triggered; a cloud
-  retry happens at most once per validation failure. This is a known gap for a
-  hostile user, documented rather than hidden.
+  retry happens at most once per validation failure. The model's free tier
+  enforces 15 requests/minute server-side, which the measurement harness paces
+  under. This is a known gap for a hostile user, documented rather than hidden.
 
 ## Layer 3 — Data and privacy
 
@@ -72,11 +78,22 @@ Commands run locally:
 - Debug token is never written into the repo; `VITE_APP_CHECK_DEBUG` only
   toggles the provider at runtime.
 
+## Deployment evidence
+
+- `bash scripts/deploy.sh lentera-6f2a-db3a1` exited 0 and released Firestore
+  rules plus Hosting.
+- Live `/` and `/antrean` return HTTP 200 with the SPA shell.
+- Live response headers include `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`,
+  `Permissions-Policy: camera=(self), microphone=(), geolocation=()`, and HSTS.
+- The deployed bundle contains project `lentera-6f2a-db3a1`; no demo config or
+  `VITE_DISABLE_AI` flag is present in the production build.
+
 ## Pending before public deployment
 
-1. Register reCAPTCHA Enterprise site key and enforce App Check for AI Logic.
-2. Capture Network evidence for local and cloud AI paths.
-3. Add a per-user rate limit at the app layer if public traffic is expected.
-4. Rotate the App Check debug token if it was ever pasted into a shared channel.
-5. Verify the configured Hosting security headers on the real domain; the local
-   Hosting emulator does not emit them.
+1. Initialize Anonymous Auth in the console and verify a live save reaches
+   `terkirim`; the public API returns `BILLING_NOT_ENABLED` on Spark.
+2. Register reCAPTCHA Enterprise site key and enforce App Check for AI Logic.
+3. Capture Network evidence for local and cloud AI paths.
+4. Add a per-user rate limit at the app layer if public traffic is expected.
+5. Rotate the App Check debug token if it was ever pasted into a shared channel.

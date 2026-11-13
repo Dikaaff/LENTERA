@@ -11,6 +11,10 @@ up into a daily situation report for coordinators.
 Built for the **#BuildHybridAI** challenge using **Firebase AI Logic hybrid
 inference**: Gemini Nano on-device when possible, Gemini in the cloud when not.
 
+**Live:** <https://lentera-6f2a-db3a1.web.app> — rules + hosting are deployed.
+Anonymous Auth is not initialized yet on the Spark project, so the live app
+opens as `TAMU` and saving does not sync until that console step is done.
+
 ![LENTERA mark](public/logo-lockup.svg)
 
 ## Why hybrid, specifically
@@ -177,6 +181,12 @@ routing ceiling. See `docs/prompts/metrics.md`.
   save → Firestore emulator sync (`terkirim`) → reload persistence → map.
   Evidence: [queue](docs/evidence/e2e-antrean.png) and
   [map](docs/evidence/e2e-peta.png).
+- 36/36 cloud extraction calls succeeded on `gemini-3.5-flash-lite` via Firebase
+  AI Logic: schema-valid 100%, field accuracy 87.5% (21/24), average 2,603 ms,
+  p95 6,033 ms, all `in_cloud`. Raw data:
+  [cloud-metrics.json](docs/prompts/cloud-metrics.json).
+- Firestore rules and Hosting are live at the URL above; `/` and `/antrean`
+  return 200, and the configured security headers are present.
 
 A real bug was found by that walkthrough and fixed: Firestore metadata-only
 changes do not fire a listener by default, so a successful upload never flipped
@@ -184,25 +194,23 @@ to `terkirim`. `watchReport` now uses `includeMetadataChanges: true`, and the
 sync-resume path runs on boot after sign-in. A second walkthrough injects a
 queued record, reloads, and proves that resume uploads it.
 
-Hosting rewrite was verified locally: `/antrean` returns 200 and the SPA shell.
-Custom security headers are configured but the Hosting emulator does not emit
-them, so they remain unverified until a real deploy.
+Hosting rewrite was verified locally and live: `/antrean` returns 200 and the
+SPA shell. Security headers were verified on the real domain.
 
-**Not measured, because no Firebase project or Nano device was attached to the
-build session:**
+**Not measured or not enabled:**
 
-- live extraction accuracy (target ≥90%),
-- local vs cloud A/B numbers,
+- local vs cloud A/B numbers; no Chrome 139+ Nano profile is attached,
 - zero-request Network-tab proof for the local path,
+- `sitrep.cluster.v1` and `sitrep.daily.v1` quality,
 - Nano download screenshot,
-- real conflict behavior across two devices.
-- a real deploy: `firebase deploy` exits 1 with "Failed to authenticate".
+- real conflict behavior across two devices,
+- live anonymous sign-in and a live `terkirim` badge: Auth is not initialized,
+- reCAPTCHA Enterprise / App Check enforcement.
 
-These are marked pending in `docs/prompts/metrics.md`, `docs/qa.md`, and
-`docs/security/evidence.md` rather than claimed. `npm run measure:cloud`
-exits 2 with a recorded reason instead of producing fake numbers. The exact procedure to produce
-them is written down. Running the app without `.env.local` demonstrates the
-local-first half truthfully.
+Extraction field accuracy is 87.5%, below the 90% bar for automatic wiring, so
+the editable card stays mandatory. These limits are recorded in
+`docs/prompts/metrics.md`, `docs/qa.md`, and `docs/security/evidence.md` rather
+than claimed.
 
 Other known limitations:
 

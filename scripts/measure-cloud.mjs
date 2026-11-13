@@ -6,6 +6,8 @@ const CHROME =
   "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const URL = process.env.E2E_URL ?? "http://localhost:5173/";
 const RUNS = Number(process.env.MEASURE_RUNS ?? 3);
+// Free tier is 15 requests/minute; 5s spacing stays under it.
+const PACE_MS = Number(process.env.MEASURE_PACE_MS ?? 5000);
 const OUT = "docs/prompts/cloud-metrics.json";
 const BLOCKED = "docs/prompts/cloud-metrics.blocked.json";
 
@@ -53,6 +55,7 @@ const writeBlocked = (reason, extra = {}) => {
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: "new",
+  protocolTimeout: 360000,
   args: ["--no-sandbox", "--disable-dev-shm-usage"],
 });
 
@@ -99,7 +102,7 @@ try {
       process.exitCode = 2;
     } else {
       const results = await page.evaluate(
-        async (runs) => {
+        async (runs, paceMs) => {
           const inference = await import("/src/modules/inference/index.ts");
           const prompt = await import(
             "/src/modules/inference/prompts/report.extract.v1.ts"
@@ -107,6 +110,9 @@ try {
           const rows = [];
           for (const testCase of prompt.TEST_CASES) {
             for (let index = 0; index < runs; index += 1) {
+              if (paceMs > 0) {
+                await new Promise((resolve) => setTimeout(resolve, paceMs));
+              }
               const started = performance.now();
               const result = await inference.runTask(
                 "report.extract.v1",
@@ -128,9 +134,17 @@ try {
           return rows;
         },
         RUNS,
+        PACE_MS,
       );
 
       const ok = results.filter((row) => row.status === "ok");
+      const responded = results.filter((row) => row.status !== "unavailable");
+      const failed = results.filter((row) => row.status !== "ok");
+      const failureKinds = failed.reduce((acc, row) => {
+        const status = /\[(\d{3})\s*\]/.exec(row.error ?? "")?.[1] ?? "unavailable";
+        acc[status] = (acc[status] ?? 0) + 1;
+        return acc;
+      }, {});
       const latencies = ok.map((row) => row.wallMs).sort((a, b) => a - b);
       const p95 = latencies.length
         ? latencies[Math.min(latencies.length - 1, Math.ceil(latencies.length * 0.95) - 1)]
@@ -149,6 +163,7 @@ try {
           id,
           runs: rows.length,
           ok: rows.filter((row) => row.status === "ok").length,
+          unavailable: rows.filter((row) => row.status !== "ok").length,
           sources: [...new Set(rows.map((row) => row.meta.inferenceSource ?? "unknown"))],
           avgLatencyMs: Math.round(
             rows.reduce((sum, row) => sum + row.wallMs, 0) / rows.length,
@@ -166,7 +181,14 @@ try {
         summary: {
           totalCalls: results.length,
           okCalls: ok.length,
-          schemaValidRate: Number((ok.length / results.length).toFixed(4)),
+          availabilityRate: Number((ok.length / results.length).toFixed(4)),
+          // Schema validity is measured against calls that actually returned a
+          // model response; transport failures are availability, not validity.
+          schemaValidRate: responded.length
+            ? Number((ok.length / responded.length).toFixed(4))
+            : null,
+          failureKinds,
+          paceMs: PACE_MS,
           fieldAccuracy:
             fieldTotal === 0 ? null : Number((fieldMatches / fieldTotal).toFixed(4)),
           scoredFields: fieldTotal,

@@ -2,15 +2,16 @@
 # Guarded production deploy. Nothing runs against a real project by accident.
 set -euo pipefail
 
-PROJECT="${FIREBASE_PROJECT:-}"
+PROJECT="${1:-${FIREBASE_PROJECT:-}}"
 ENV_PROJECT=$(grep -E '^VITE_FIREBASE_PROJECT_ID=' .env.local 2>/dev/null | tail -1 | cut -d= -f2- | tr -d '\r' || true)
 if [ -z "$PROJECT" ]; then
   PROJECT="$ENV_PROJECT"
 fi
 
 if [ -z "$PROJECT" ] || [ "$PROJECT" = "lentera-demo" ]; then
-  echo "Refusing deploy: set FIREBASE_PROJECT to a real project id."
-  echo "Example: FIREBASE_PROJECT=lentera-prod bash scripts/deploy.sh"
+  echo "Refusing deploy: pass a real project id."
+  echo "Example: bash scripts/deploy.sh lentera-prod"
+  echo "   or:  FIREBASE_PROJECT=lentera-prod bash scripts/deploy.sh"
   exit 2
 fi
 
