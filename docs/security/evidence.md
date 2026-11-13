@@ -17,7 +17,7 @@ separates verified local behavior from deployment steps that remain.
   - a volunteer cannot edit a synced report;
   - a coordinator from another region cannot read;
   - deletion is always false.
-- **Executed:** 11 Real Firestore emulator rules tests pass via
+- **Executed:** 11 real Firestore emulator rules tests pass via
   `npm run test:rules` (Firestore emulator 1.22.0, JRE 21 local). File:
   `tests/rules.emulator.test.ts`. It seeds coordinator and report documents with
   rules disabled, then asserts allowed and denied operations per role.
