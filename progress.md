@@ -77,8 +77,8 @@ emulator E2E        -> capture → sync terkirim → reload → map: PASS
 | #   | Commit                                            | Pushed | Note                                                 |
 | --- | ------------------------------------------------- | ------ | ---------------------------------------------------- |
 | 1   | `b8e9372` scaffold: full LENTERA app, tests, docs | yes    | `git push -u origin main` exit 0; remote ref matches |
-| 2   | `3f059d4` docs: verified push + boot check        | yes    | `git push` exit 0                                    |
-| 3   | `3a1cdee` emulator rules + E2E + sync fix         | yes    | `git push` exit 0                                    |
+| 2   | `3f059d4` docs: verified push + boot check        | yes    | `git push` exit 0                                    |     | 3   | `3a1cdee` emulator rules + E2E + sync fix | yes | `git push` exit 0 |
+| 4   | `d7f9cc3` emulator verification log               | yes    | `git push` exit 0                                    |
 
 `gh auth status` reports no login, but the cached git credential completes the
 push. Future pushes use the same remote and fail loudly if credentials expire.
