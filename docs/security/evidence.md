@@ -78,3 +78,5 @@ Commands run locally:
 2. Capture Network evidence for local and cloud AI paths.
 3. Add a per-user rate limit at the app layer if public traffic is expected.
 4. Rotate the App Check debug token if it was ever pasted into a shared channel.
+5. Verify the configured Hosting security headers on the real domain; the local
+   Hosting emulator does not emit them.

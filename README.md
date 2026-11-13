@@ -115,6 +115,13 @@ It drives capture → local fallback → save → Firestore sync (`terkirim`) �
 reload → map, and writes screenshots to `docs/evidence/`. `VITE_DISABLE_AI=1`
 skips model calls so this test exercises the manual fallback, not model quality.
 
+```bash
+node scripts/e2e-resume.mjs   # queued report survives reload, then syncs
+```
+
+The resume test injects a `status: "queued"` record into the local queue and
+reloads; only `resumeSync` can turn it into `terkirim`.
+
 ### Firebase setup
 
 1. Create a project, enable Firestore, Authentication (Anonymous + Google), and
@@ -125,9 +132,12 @@ skips model calls so this test exercises the manual fallback, not model quality.
    Apps → Manage debug tokens**. Never commit the token.
 4. For production, set `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` and enforce App Check
    for AI Logic.
-5. Deploy rules and hosting: `npx firebase deploy --only firestore:rules,hosting`.
+5. Deploy rules and hosting with the guarded script:
+   `FIREBASE_PROJECT=<id> bash scripts/deploy.sh`. It refuses `lentera-demo`,
+   stale emulator flags, and a mismatch with `.env.local`. See `docs/deploy.md`.
    Seed `coordinators/{uid}` with `{ region: "Jawa Barat" }` for each coordinator.
    Coordinator identity needs `email_verified == true`.
+6. Measure cloud quality with `MEASURE_CONFIRM=1 npm run measure:cloud`.
 
 `scripts/setup.sh` walks through the human-only steps.
 
@@ -171,7 +181,12 @@ routing ceiling. See `docs/prompts/metrics.md`.
 A real bug was found by that walkthrough and fixed: Firestore metadata-only
 changes do not fire a listener by default, so a successful upload never flipped
 to `terkirim`. `watchReport` now uses `includeMetadataChanges: true`, and the
-sync-resume path runs on boot after sign-in.
+sync-resume path runs on boot after sign-in. A second walkthrough injects a
+queued record, reloads, and proves that resume uploads it.
+
+Hosting rewrite was verified locally: `/antrean` returns 200 and the SPA shell.
+Custom security headers are configured but the Hosting emulator does not emit
+them, so they remain unverified until a real deploy.
 
 **Not measured, because no Firebase project or Nano device was attached to the
 build session:**
@@ -181,9 +196,11 @@ build session:**
 - zero-request Network-tab proof for the local path,
 - Nano download screenshot,
 - real conflict behavior across two devices.
+- a real deploy: `firebase deploy` exits 1 with "Failed to authenticate".
 
 These are marked pending in `docs/prompts/metrics.md`, `docs/qa.md`, and
-`docs/security/evidence.md` rather than claimed. The exact procedure to produce
+`docs/security/evidence.md` rather than claimed. `npm run measure:cloud`
+exits 2 with a recorded reason instead of producing fake numbers. The exact procedure to produce
 them is written down. Running the app without `.env.local` demonstrates the
 local-first half truthfully.
 

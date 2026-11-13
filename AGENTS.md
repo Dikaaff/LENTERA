@@ -51,6 +51,8 @@ npm run dev         # local app
 npm run typecheck   # tsc -b
 npm run test        # vitest unit tests (43)
 npm run test:rules  # Firestore emulator rules tests (11, needs Java 17+)
+npm run measure:cloud  # real cloud metrics; needs MEASURE_CONFIRM=1 + real config
+FIREBASE_PROJECT=<id> bash scripts/deploy.sh  # guarded deploy
 npm run boundaries  # dependency-cruiser
 npm run build       # production build
 npm run check       # typecheck + test + boundaries

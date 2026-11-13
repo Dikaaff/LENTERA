@@ -13,6 +13,23 @@ Accuracy and latency are deliberately blank, not guessed.
 | `sitrep.cluster.v1` | cloud | not executed            | depends on report count | unknown           | not measured | none observed                 |
 | `sitrep.daily.v1`   | cloud | not executed            | depends on cluster size | unknown           | not measured | none observed                 |
 
+## Cloud measurement harness (ready, not executed)
+
+`scripts/measure-cloud.mjs` runs the real `runTask(..., { forceCloud: true })`
+inside the browser for all 12 cases, three times each, and writes
+`docs/prompts/cloud-metrics.json`. It computes schema-valid rate, field accuracy
+for the eight cases with object expectations, wall-clock latency, p95, and the
+`inferenceSource` of each call.
+
+```bash
+# real .env.local, AI enabled, dev server running
+MEASURE_CONFIRM=1 npm run measure:cloud
+```
+
+Attempt on 2026-11-13 was **blocked** (exit 2): the running app was in emulator
+mode with `lentera-demo`, and `VITE_DISABLE_AI=1`. The reason is recorded in
+`cloud-metrics.blocked.json`. No number below was filled from that attempt.
+
 ## Local verification that did run (not model quality)
 
 - Firestore Auth + emulator walkthrough with `VITE_DISABLE_AI=1`:

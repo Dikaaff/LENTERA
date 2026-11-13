@@ -4,15 +4,19 @@ Date: 2026-11-13.
 
 ## Commands actually run
 
-| Command                         | Result                                | Evidence                    |
-| ------------------------------- | ------------------------------------- | --------------------------- |
-| `npm run typecheck`             | pass, 0 errors                        | exit 0                      |
-| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output               |
-| `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest |
-| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser          |
-| `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                     |
-| `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                    |
-| emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`   |
+| Command                         | Result                                | Evidence                                  |
+| ------------------------------- | ------------------------------------- | ----------------------------------------- |
+| `npm run typecheck`             | pass, 0 errors                        | exit 0                                    |
+| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output                             |
+| `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest               |
+| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser                        |
+| `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                                   |
+| `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                                  |
+| emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`                 |
+| `node scripts/e2e-resume.mjs`   | queued report synced after reload     | `docs/evidence/e2e-resume.png`            |
+| hosting emulator                | `/antrean` 200; SPA shell served      | `/tmp/hosting2.log`                       |
+| `npm run measure:cloud`         | blocked, exit 2, no real project      | `docs/prompts/cloud-metrics.blocked.json` |
+| `firebase deploy`               | blocked, exit 1, not authenticated    | `docs/evidence/deploy-blocked.txt`        |
 
 ## What the tests cover
 
@@ -38,6 +42,9 @@ Date: 2026-11-13.
 - **Browser E2E:** consent gate appears, local fallback renders an editable card,
   save reaches Firestore emulator, badge becomes `terkirim`, held count returns
   to 0, reload keeps the report, map renders the province with 1 report.
+- **Resume E2E:** a report injected into `lentera.queue.v1` with `status: queued`
+  (simulating a previous session) is uploaded by `resumeSync` after reload; both
+  records reach `synced` and the held count is 0.
 
 ## Bug found and fixed by the walkthrough
 
@@ -64,13 +71,30 @@ boot.
 5. **PII:** masking is regex-based. Nicknames without a label, or names written
    in lowercase, can slip through. Documented limitation; consent gate remains.
 
+## Cloud measurement and deploy attempts
+
+- `scripts/measure-cloud.mjs` drives the real `runTask` in the page with
+  `forceCloud` and 3 runs per case, then writes
+  `docs/prompts/cloud-metrics.json`. It refuses to run without
+  `MEASURE_CONFIRM=1`.
+- It exited **2** here: the dev server is in emulator mode and the only project
+  id is `lentera-demo`. The reason is recorded in
+  `docs/prompts/cloud-metrics.blocked.json`; no metric was invented.
+- `scripts/deploy.sh` refuses the demo project and stale emulator flags. Both
+  guards return exit 2.
+- Hosting emulator served `/antrean` with HTTP 200 and the SPA shell, so the
+  rewrite is valid. It does **not** emit the configured security headers, so
+  those remain unverified until real Hosting.
+
 ## Not verified
 
 - No live model call (cloud or Nano), therefore no accuracy, A/B, latency, or
-  Network-tab zero-request evidence.
+  Network-tab zero-request evidence. The harness is ready but blocked.
 - No Nano download screenshot; no Chrome 139+ profile.
 - No two-device conflict reproduction; conflict logic is unit-tested only.
-- No Firebase deployment and no reCAPTCHA Enterprise enforcement.
+- No Firebase deployment: `firebase deploy` exits 1 with
+  "Failed to authenticate". No reCAPTCHA Enterprise enforcement.
+- Hosting security headers are configured but not observable in the emulator.
 
 ## Gate status
 

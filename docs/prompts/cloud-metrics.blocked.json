@@ -1,0 +1,10 @@
+{
+  "status": "blocked",
+  "reason": "AI dinonaktifkan untuk uji lokal. Isi kolom manual; catatan tetap tersimpan.",
+  "checkedAt": "2026-11-13T04:47:35.597Z",
+  "url": "http://localhost:5173/",
+  "runsPerCase": 3,
+  "configured": true,
+  "projectId": "lentera-demo",
+  "inferenceSource": null
+}
