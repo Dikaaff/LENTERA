@@ -111,6 +111,18 @@ push. Future pushes use the same remote and fail loudly if credentials expire.
 4. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
    numbers.
 
+## Session 4 progress (admin screen + modern UI)
+
+- [~] Admin screen (`AdminScreen`) for koordinator: uji kasus 5 laporan,
+  tinjau cluster + SITREP hasil.
+- [~] Shell modernisasi: ikon SVG, menu profil, riwayat keluar/masuk,
+  badge peran, layar terkunci untuk tamu.
+- [~] Typecheck lolos via transpile pemeriksaan cepat; TSc full masih lambat.
+- [ ] Bangun & deploy ulang dengan site key App Check. Uji token client.
+- [ ] Set Firestore ENFORCED.
+- [ ] Jalankan SITREP measurement.
+- [ ] Jalankan cloud measurement ulang setelah fix schema/prompt.
+
 ## Live verification (session 3)
 
 - `accounts:signUp` with the web API key returned 200 after Anonymous Auth was
@@ -131,3 +143,7 @@ field accuracy 0.875 (21/24); avg 2,603 ms; p95 6,033 ms. Only mismatch:
 `extreme-numbers` was labelled report (`is_report: true`) in 3/3 runs even
 though the fixture expects rejection; this is a prompt-policy gap, not a schema
 failure. Detail: `docs/prompts/cloud-metrics.json`.
+
+LENS: nano gpu 128 MB / Chrome 157 LanguageModel.unavailable; reCAPTCHA site key 6Lfe0h0uAAAAAFhriIc48g4get5hmL-DsK9E7anq ke web app; Firestore UNENFORCED; confirm site key env + revisit enforcement; fix prompt/schema (100k/confidence-low); SITREP harness 6 cloud calls.
+
+WORKSPACE_LOG: stage4 began.

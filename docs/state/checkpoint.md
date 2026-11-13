@@ -41,6 +41,14 @@ State: **DEPLOYED — CLOUD MEASURED — LIVE SAVE VERIFIED**
 4. Repeat the extraction path on Chrome 139+ with Nano and record local
    latency/source.
 
+## Session 4 add-on (admin + modern UI)
+
+- AdminScreen (`/admin`) tersedia untuk koordinator: daftar 5 uji kasus,
+  tombol tinjau hasil cluster + SITREP.
+- Shell diperbarui: ikon dalam header, menu profil kanan, badge peran,
+  layar terkunci untuk tamu.
+- TSc full lambat; pemeriksaan transpile cepat OK untuk App.tsx + AdminScreen.
+
 ## Resume protocol
 
 Read `progress.md` first. Do not repeat a `[x]` task; verify its evidence instead.
