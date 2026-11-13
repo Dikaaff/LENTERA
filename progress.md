@@ -56,8 +56,8 @@ Last update: 2026-11-13, session 1.
 | T22 | Unit tests                                                     | [x]    | 43 tests, 7 files, all pass                           |
 | T23 | Typecheck / boundaries / build                                 | [x]    | all exit 0                                            |
 | T24 | README, Apache-2.0, video script                               | [x]    | `README.md`, `LICENSE`, `docs/video-script.md`        |
-| T25 | QA, security evidence, metrics, assumptions                    | [x]    | `docs/qa.md`, `docs/security/`, `docs/prompts/`       |
-| T26 | Retro + checkpoint                                             | [x]    | `docs/retro.md`, `docs/state/checkpoint.md`           |
+| T25 | QA, security evidence, metrics, assumptions                    | [x]    | `docs/qa.md`, `docs/security/`, `docs/prompts/`       |     | T26 | Retro + checkpoint | [x] | `docs/retro.md`, `docs/state/checkpoint.md` |
+| T27 | Runtime boot check                                             | [x]    | dev HTTP 200 + headless Chrome rendered all four tabs |
 
 ## Verification snapshot
 
@@ -66,21 +66,23 @@ npm run typecheck   -> pass
 npm run test        -> 7 files, 43 tests passed
 npm run boundaries  -> 0 violations (56 modules)
 npm run build       -> pass; PWA precache 9 entries
+npm run dev         -> HTTP 200
+headless Chrome     -> Isi Laporan, Antrean, Peta, SITREP rendered;
+                       local-only banner shown without Firebase config
 ```
 
 ## Push log
 
-| #   | Commit                                  | Pushed     | Note                                 |
-| --- | --------------------------------------- | ---------- | ------------------------------------ |
-| 1   | scaffold: full LENTERA app, tests, docs | attempting | `gh` unauthenticated; see note below |
+| # | Commit | Pushed | Note |
+| --- | --------------------------------------- | ---------- | ------------------------------------ || 1 | `b8e9372` scaffold: full LENTERA app, tests, docs | yes | `git push -u origin main` exit 0; remote ref matches |
 
-Push attempts are recorded with their exact result. Local commits are never
-lost if the remote rejects.
+`gh auth status` reports no login, but the cached git credential completed the
+push. Future pushes use the same remote and fail loudly if credentials expire.
 
 ## Blockers
 
 1. **No Firebase project config.** AI and Firestore cannot execute. The app
    reports this in the UI; nothing is faked.
 2. **No Nano-capable Chrome.** On-device path unmeasured.
-3. **GitHub CLI unauthenticated.** `git push` may fail until credentials exist.
-4. **No emulator/Java.** Rules unit tests against the real emulator are pending.
+3. **No emulator/Java.** Rules unit tests against the real emulator are pending.
+4. **Live AI path unmeasured.** Requires both blockers 1 and 2 resolved.

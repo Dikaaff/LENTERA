@@ -4,13 +4,13 @@ Date: 2026-11-13.
 
 ## Commands actually run
 
-| Command              | Result                             | Evidence                  |
-| -------------------- | ---------------------------------- | ------------------------- |
-| `npm run typecheck`  | pass, 0 errors                     | exit 0                    |
-| `npm run test`       | 7 files, 43 tests passed           | Vitest output             |
-| `npm run boundaries` | 0 violations, 56 modules, 122 deps | dependency-cruiser output |
-| `npm run build`      | pass, PWA precache 9 entries       | dist generated            |
-| `git status --short` | no `.env` staged                   | see security evidence     |
+| Command                         | Result                                                      | Evidence                  |
+| ------------------------------- | ----------------------------------------------------------- | ------------------------- |
+| `npm run typecheck`             | pass, 0 errors                                              | exit 0                    |
+| `npm run test`                  | 7 files, 43 tests passed                                    | Vitest output             |
+| `npm run boundaries`            | 0 violations, 56 modules, 122 deps                          | dependency-cruiser output |
+| `npm run build`                 | pass, PWA precache 9 entries                                | dist generated            |     | `git status --short` | no `.env` staged | see security evidence |
+| `npm run dev` + headless Chrome | HTTP 200; all four tabs rendered; local-only banner visible | DOM dump                  |
 
 ## What the tests cover
 
@@ -49,8 +49,9 @@ Date: 2026-11-13.
 
 - No live model call, no Network-tab capture, no Nano download, no emulator
   rules run, no Firebase deployment.
-- No browser rendering check was performed in this session; the production
-  build compiled and the dev server was not visually inspected.
+- No interactive browser walkthrough was performed: the app was rendered once
+  in headless Chrome to confirm the four tabs and the local-only banner mount.
+  No click-through of capture → queue → SITREP was executed.
 - No E2E test of the capture → queue → sync flow.
 
 ## Gate status
