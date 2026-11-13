@@ -11,9 +11,9 @@ up into a daily situation report for coordinators.
 Built for the **#BuildHybridAI** challenge using **Firebase AI Logic hybrid
 inference**: Gemini Nano on-device when possible, Gemini in the cloud when not.
 
-**Live:** <https://lentera-6f2a-db3a1.web.app> — rules + hosting are deployed.
-Anonymous Auth is not initialized yet on the Spark project, so the live app
-opens as `TAMU` and saving does not sync until that console step is done.
+**Live:** <https://lentera-6f2a-db3a1.web.app> — rules, hosting, and anonymous
+Auth are active. A live headless run signed in as `RELAWAN`, saved a report, saw
+`TERKIRIM`, and kept it after reload: `docs/evidence/live-terkirim.png`.
 
 ![LENTERA mark](public/logo-lockup.svg)
 
@@ -187,6 +187,9 @@ routing ceiling. See `docs/prompts/metrics.md`.
   [cloud-metrics.json](docs/prompts/cloud-metrics.json).
 - Firestore rules and Hosting are live at the URL above; `/` and `/antrean`
   return 200, and the configured security headers are present.
+- Live Auth + save: anonymous sign-in 200, badge `terkirim`, held count 0, and
+  the report survives reload. The run used the manual fallback because Nano is
+  unavailable on this desktop.
 
 A real bug was found by that walkthrough and fixed: Firestore metadata-only
 changes do not fire a listener by default, so a successful upload never flipped
@@ -204,8 +207,9 @@ SPA shell. Security headers were verified on the real domain.
 - `sitrep.cluster.v1` and `sitrep.daily.v1` quality,
 - Nano download screenshot,
 - real conflict behavior across two devices,
-- live anonymous sign-in and a live `terkirim` badge: Auth is not initialized,
-- reCAPTCHA Enterprise / App Check enforcement.
+- reCAPTCHA Enterprise / App Check enforcement,
+- a model-backed live save: the live proof used the manual fallback (`JALUR:
+MANUAL`), not Nano or cloud.
 
 Extraction field accuracy is 87.5%, below the 90% bar for automatic wiring, so
 the editable card stays mandatory. These limits are recorded in

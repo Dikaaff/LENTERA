@@ -18,8 +18,7 @@ Date: 2026-11-13.
 | `npm run measure:cloud`         | 36/36 ok; schema 1.0; accuracy 0.875  | `docs/prompts/cloud-metrics.json` |
 | `bash scripts/deploy.sh <id>`   | exit 0; rules + hosting released      | `/tmp/deploy-real.log`            |
 | live URL smoke                  | `/` and `/antrean` HTTP 200           | `docs/evidence/deploy-live.png`   |
-| live security headers           | all configured headers present        | `curl -I` output                  |
-| live anonymous sign-in          | failed: `CONFIGURATION_NOT_FOUND`     | Auth not initialized              |
+| live security headers           | all configured headers present        | `curl -I` output                  |     | live sign-in + save | RELAWAN → `terkirim` → reload | `docs/evidence/live-terkirim.png` |
 
 ## What the tests cover
 
@@ -100,14 +99,15 @@ camera=(self), microphone=(), geolocation=()`, and HSTS.
 - The live bundle carries project `lentera-6f2a-db3a1`.
 - Deploy guards still reject `lentera-demo`, emulator flags, and a mismatched
   `.env.local` (exit 2).
+- Anonymous Auth is active (`accounts:signUp` 200). Headless Chrome signed in as
+  `RELAWAN`, saved one report, saw `TERKIRIM` with `DITAHAN 0`, and kept it after
+  reload (`AUTH_OK`, `LIVE_SYNC_OK`, `LIVE_RELOAD_OK`, `E2E_LIVE_PASS`). The run
+  shows `JALUR: MANUAL` because Nano is unavailable on this desktop.
 
 ## Not verified
 
-- **Anonymous Auth is inactive on the live project.** `initializeAuth` returns
-  `BILLING_NOT_ENABLED` on Spark, and client sign-in returns
-  `CONFIGURATION_NOT_FOUND`. The live app therefore stays `TAMU`; a saved report
-  reaching `terkirim` on the live domain is **not** verified. Console
-  Authentication → Get started is the next step.
+- No model-backed live save: the live proof used the manual fallback
+  (`JALUR: MANUAL`), not Nano or cloud.
 - No Nano call or screenshot; no Chrome 139+ profile.
 - No two-device conflict reproduction; conflict logic is unit-tested only.
 - No reCAPTCHA Enterprise site key or App Check enforcement. AI Logic answered
@@ -117,7 +117,7 @@ camera=(self), microphone=(), geolocation=()`, and HSTS.
 ## Gate status
 
 Data, queue, rules, and the manual fallback are verified end-to-end against the
-emulator. Extraction is measured on cloud at 87.5% field accuracy, below the
-90% bar for automatic wiring, so edits stay mandatory. Auth must be initialized
-before the live write path can be called complete; the on-device half remains
-unmeasured without Nano.
+emulator, and the live write path is verified from sign-in through `terkirim`
+and reload. Extraction is measured on cloud at 87.5% field accuracy, below the
+90% bar for automatic wiring, so edits stay mandatory. The model-backed
+on-device half remains unmeasured without Nano, and App Check is not enforced.

@@ -2,7 +2,7 @@
 
 Updated: 2026-11-13 (session 3)
 
-State: **DEPLOYED — CLOUD MEASURED — AUTH INITIALIZATION PENDING**
+State: **DEPLOYED — CLOUD MEASURED — LIVE SAVE VERIFIED**
 
 - Live URL: <https://lentera-6f2a-db3a1.web.app>
 - Firebase project: `lentera-6f2a-db3a1` (number `1028167597621`).
@@ -14,34 +14,32 @@ State: **DEPLOYED — CLOUD MEASURED — AUTH INITIALIZATION PENDING**
   Evidence: `docs/prompts/cloud-metrics.json`.
 - Live `/` and `/antrean` return 200; security headers are present. Screenshot:
   `docs/evidence/deploy-live.png`.
+- Anonymous Auth is active. Headless Chrome on the live URL signed in as
+  `RELAWAN`, saved a report, saw `TERKIRIM` with `DITAHAN 0`, and the report
+  survived a reload. Evidence: `docs/evidence/live-terkirim.png`.
 
 ## Open blockers
 
-1. **Anonymous Auth is not initialized.** Spark rejects the public
-   `initializeAuth` call with `BILLING_NOT_ENABLED`, and client sign-in returns
-   `CONFIGURATION_NOT_FOUND`. The owner must click Authentication → Get started
-   → Anonymous in the Firebase console. Until then the live app is `TAMU` and a
-   saved report cannot reach `terkirim`.
-2. **No Nano-capable Chrome.** On-device path and A/B numbers are unmeasured.
-3. **No App Check enforcement.** AI Logic answered without it; the reCAPTCHA
+1. **No Nano-capable Chrome.** On-device path and A/B numbers are unmeasured.
+   The live save used the manual fallback (`JALUR: MANUAL`).
+2. **No App Check enforcement.** AI Logic answered without it; the reCAPTCHA
    Enterprise site key is still unset.
-4. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
+3. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
    numbers.
-5. **Prompt gaps found by measurement:** `missing-regency` returns `high`
+4. **Prompt gaps found by measurement:** `missing-regency` returns `high`
    confidence instead of `low` (3/3), and `extreme-numbers` is accepted as a
    report (3/3).
+5. **Coordinator docs are not seeded.** Needs a Google-signed-in uid.
 
 ## Exact next action
 
-1. In the Firebase console for `lentera-6f2a-db3a1`, open **Authentication**,
-   click **Get started**, enable **Anonymous**, and add the Hosting domain to
-   authorized domains if it is not already listed.
-2. On the live URL, verify sign-in leaves `TAMU`, save one report, and confirm
-   `terkirim`. Record the screenshot.
-3. Optionally enforce App Check (reCAPTCHA Enterprise) and seed
-   `coordinators/{uid}`.
-4. Fix the two prompt/validation gaps, then rerun
+1. Optionally enforce App Check (reCAPTCHA Enterprise) and seed
+   `coordinators/{uid}` with a region.
+2. Fix the two prompt/validation gaps, then rerun
    `MEASURE_CONFIRM=1 MEASURE_PACE_MS=5000 npm run measure:cloud`.
+3. Measure `sitrep.cluster.v1` and `sitrep.daily.v1`.
+4. Repeat the extraction path on Chrome 139+ with Nano and record local
+   latency/source.
 
 ## Resume protocol
 

@@ -49,7 +49,7 @@ Code-level items (build, typecheck, tests, boundaries, schema validation,
 offline queue, export, consent, masking) are done. Data and rules are verified
 end-to-end against the emulator, including cross-volunteer denial. Cloud
 extraction is measured (36/36, 87.5% field accuracy) and rules + Hosting are
-deployed. Still **unverified**: local extraction, dedup confidence, SITREP
-narrative, zero-request Network proof, and Nano download, because no
-Nano-capable device exists in this environment. Anonymous Auth also awaits the
-console step. The README says so.
+deployed; anonymous Auth and a live save through `terkirim` are verified. Still
+**unverified**: local extraction, dedup confidence, SITREP narrative,
+zero-request Network proof, and Nano download, because no Nano-capable device
+exists in this environment. The README says so.

@@ -20,7 +20,7 @@ Last update: 2026-11-13, session 3.
 | F3    | Constitution, scaffold, guardrails | [x] AGENTS, depcruise, husky, setup wizard        |
 | F4    | Brand, logo, design system         | [x] brand.md, design.md, 3 SVG assets             |
 | F5    | Inference core                     | [~] 44 tests + 36/36 cloud calls; Nano unmeasured |
-| F6    | Data layer and offline queue       | [x] emulator sync + reload verified               |
+| F6    | Data layer and offline queue       | [x] emulator + live sync verified                 |
 | F7    | Prompt artifacts                   | [~] 3 artifacts; cloud measured, Nano unmeasured  |
 | F8    | UI                                 | [x] 4 screens + status bar + consent              |
 | F9    | Security                           | [x] 11 rules tests pass; rules + hosting deployed |
@@ -67,8 +67,9 @@ Last update: 2026-11-13, session 3.
 | T33 | Deploy rules + hosting to real project                         | [x]    | `lentera-6f2a-db3a1`; deploy exit 0                     |
 | T34 | Hosting security headers                                       | [x]    | verified on live domain                                 |
 | T35 | Provision Firebase AI Logic config                             | [x]    | PATCH config 200; cloud calls served                    |
-| T36 | Enable Anonymous Auth on Spark                                 | [!]    | console-only; live sign-in still 400                    |
+| T36 | Enable Anonymous Auth on Spark                                 | [x]    | console step done; `accounts:signUp` 200                |
 | T37 | Live smoke of deployed URL                                     | [x]    | `/` and `/antrean` 200; `docs/evidence/deploy-live.png` |
+| T38 | Live report save + reload                                      | [x]    | `E2E_LIVE_PASS`; `docs/evidence/live-terkirim.png`      |
 
 ## Verification snapshot
 
@@ -82,6 +83,8 @@ hosting emulator    -> /antrean returns 200 and the SPA shell
 npm run measure:cloud -> 36/36 ok; schema 1.0; field accuracy 0.875
 firebase deploy     -> exit 0; rules + hosting released
 live URL            -> https://lentera-6f2a-db3a1.web.app (HTTP 200)
+live sign-in        -> anonymous 200; app shows RELAWAN
+live save           -> badge terkirim; DITAHAN 0; survives reload
 ```
 
 ## Push log
@@ -100,15 +103,23 @@ push. Future pushes use the same remote and fail loudly if credentials expire.
 
 ## Blockers
 
-1. **Anonymous Auth is not initialized.** The Spark project needs
-   Authentication → Get started in the console; the public API returns
-   `BILLING_NOT_ENABLED`, and client sign-in returns
-   `CONFIGURATION_NOT_FOUND`. Until then the live app stays `TAMU` and cannot
-   sync a saved report.
-2. **No Nano-capable Chrome.** On-device path unmeasured.
-3. **No App Check enforcement.** AI Logic answered without it; the production
+1. **No Nano-capable Chrome.** On-device path unmeasured.
+2. **No App Check enforcement.** AI Logic answered without it; the production
    reCAPTCHA key is still unset.
-4. **Coordinator docs are not seeded.** Needs a signed-in Google uid.
+3. **Coordinator docs are not seeded.** Needs a signed-in Google uid.
+4. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
+   numbers.
+
+## Live verification (session 3)
+
+- `accounts:signUp` with the web API key returned 200 after Anonymous Auth was
+  enabled.
+- Headless Chrome against the live URL signed in as `RELAWAN`, saved one report,
+  and showed `TERKIRIM` with `DITAHAN 0`; the report survived a reload.
+- Log: `AUTH_OK`, `LIVE_SYNC_OK`, `LIVE_RELOAD_OK`, `E2E_LIVE_PASS`. Screenshot:
+  `docs/evidence/live-terkirim.png`.
+- The saved report used the manual fallback (`JALUR: MANUAL`), not a model call,
+  because no Nano model is available on this desktop.
 
 ## Cloud measurement snapshot
 

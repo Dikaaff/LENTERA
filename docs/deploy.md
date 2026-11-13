@@ -15,10 +15,10 @@ microphone=(), geolocation=()`, and HSTS.
   `docs/evidence/deploy-live.png`.
 - Firestore `(default)` is in `asia-southeast2`.
 
-Not active yet: **Authentication**. The Spark project still returns
-`CONFIGURATION_NOT_FOUND` for anonymous sign-in, so the live app renders as
-`TAMU` and a saved report cannot sync. Authentication → Get started must be
-clicked in the console; the public `initializeAuth` API requires billing.
+Authentication is active. Anonymous sign-in returns 200, and a live headless
+run saved a report, saw `TERKIRIM` with `DITAHAN 0`, and kept it after reload.
+Evidence: `docs/evidence/live-terkirim.png`. The run used the manual fallback
+(`JALUR: MANUAL`) because no Nano model is available on the test desktop.
 
 Everything below remains the operating procedure.
 
@@ -101,10 +101,9 @@ It exits before deploying if the project is empty or `lentera-demo`.
 1. Seed one coordinator document per region:
    `coordinators/{uid} = { region: "Aceh" }`.
    The Google account must have `email_verified == true`.
-2. Open the Hosting URL, enable Anonymous in the console (see above), then save
-   one report.
-3. Confirm the badge reaches `terkirim`. This is **not yet verified live**
-   because Auth is inactive.
+2. Open the Hosting URL and save one report.
+3. Confirm the badge reaches `terkirim`. This is verified live in
+   `docs/evidence/live-terkirim.png`.
 4. Register the App Check debug token for local development, then enforce App
    Check for AI Logic and Firestore.
 5. Rerun `MEASURE_CONFIRM=1 MEASURE_PACE_MS=5000 npm run measure:cloud` after

@@ -1,8 +1,8 @@
 # Security evidence
 
 Date: 2026-11-13. Rules and Hosting are deployed to `lentera-6f2a-db3a1`
-(<https://lentera-6f2a-db3a1.web.app>). This file separates verified behavior
-from steps that remain, notably Authentication and App Check.
+(<https://lentera-6f2a-db3a1.web.app>), and anonymous Auth is active. This file
+separates verified behavior from steps that remain, notably App Check.
 
 ## Layer 1 — Identity and authorization
 
@@ -88,12 +88,15 @@ Commands run locally:
   `Permissions-Policy: camera=(self), microphone=(), geolocation=()`, and HSTS.
 - The deployed bundle contains project `lentera-6f2a-db3a1`; no demo config or
   `VITE_DISABLE_AI` flag is present in the production build.
+- Live anonymous sign-in returns 200. Headless Chrome saved one report as
+  `RELAWAN`, saw `TERKIRIM` with `DITAHAN 0`, and kept it after reload. Evidence:
+  `docs/evidence/live-terkirim.png`. The save used the manual fallback, so this
+  proves the Auth/rules/queue path, not a model path.
 
 ## Pending before public deployment
 
-1. Initialize Anonymous Auth in the console and verify a live save reaches
-   `terkirim`; the public API returns `BILLING_NOT_ENABLED` on Spark.
-2. Register reCAPTCHA Enterprise site key and enforce App Check for AI Logic.
-3. Capture Network evidence for local and cloud AI paths.
-4. Add a per-user rate limit at the app layer if public traffic is expected.
-5. Rotate the App Check debug token if it was ever pasted into a shared channel.
+1. Register reCAPTCHA Enterprise site key and enforce App Check for AI Logic.
+2. Capture Network evidence for local and cloud AI paths.
+3. Add a per-user rate limit at the app layer if public traffic is expected.
+4. Rotate the App Check debug token if it was ever pasted into a shared channel.
+5. Seed `coordinators/{uid}` and verify coordinator scoping live.
