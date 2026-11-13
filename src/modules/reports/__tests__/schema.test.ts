@@ -84,4 +84,9 @@ describe("status helpers", () => {
     expect(resolveRemote(local, { updatedAt: 11 })).toBe("conflict");
     expect(resolveRemote(local, { updatedAt: 9 })).toBe("queued");
   });
+
+  it("marks an acknowledged server copy as synced", () => {
+    const local = { status: "queued", updatedAt: 10 } as ReportRecord;
+    expect(resolveRemote(local, { updatedAt: 10 })).toBe("synced");
+  });
 });

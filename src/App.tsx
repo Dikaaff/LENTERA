@@ -4,6 +4,7 @@ import { NavLink, Outlet, Route, Routes } from "react-router-dom";
 import { StatusBar } from "@/components/StatusBar";
 import { Badge } from "@/components/ui/badge";
 import { ensureVolunteer, useAuthUser } from "@/modules/auth";
+import { resumeSync } from "@/modules/queue";
 import { CaptureScreen } from "@/screens/CaptureScreen";
 import { MapScreen } from "@/screens/MapScreen";
 import { QueueScreen } from "@/screens/QueueScreen";
@@ -20,7 +21,7 @@ function Shell() {
   const { role } = useAuthUser();
 
   useEffect(() => {
-    void ensureVolunteer();
+    void ensureVolunteer().then(() => resumeSync());
   }, []);
 
   return (

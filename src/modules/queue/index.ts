@@ -34,16 +34,18 @@ const watched = new Set<string>();
 
 function sync(record: ReportRecord) {
   if (!isFirebaseConfigured) return;
-  void pushReport(record).then((sent) => {
-    if (!sent || watched.has(record.id)) return;
-    watched.add(record.id);
-    watchReport(record.id, (remoteUpdatedAt) => {
-      const local = allReports().find((row) => row.id === record.id);
-      if (!local) return;
-      const next = resolveRemote(local, { updatedAt: remoteUpdatedAt });
-      patchReport(local.id, { status: next });
-    });
-  });
+  void pushReport(record)
+    .then((sent) => {
+      if (!sent || watched.has(record.id)) return;
+      watched.add(record.id);
+      watchReport(record.id, (remoteUpdatedAt) => {
+        const local = allReports().find((row) => row.id === record.id);
+        if (!local) return;
+        const next = resolveRemote(local, { updatedAt: remoteUpdatedAt });
+        patchReport(local.id, { status: next });
+      });
+    })
+    .catch((error) => console.error("[lentera] sync gagal", error));
 }
 
 export function saveReport(input: SaveReportInput): ReportRecord {
@@ -69,6 +71,9 @@ export function retrySync() {
     .filter((row) => row.status === "queued")
     .forEach(sync);
 }
+
+/** Called after sign-in and on app boot so a reload resumes pending uploads. */
+export const resumeSync = retrySync;
 
 export const useReports = () => useSyncExternalStore(subscribeQueue, allReports, allReports);
 

@@ -2,28 +2,31 @@
 
 Updated: 2026-11-13 (session 1)
 
-State: **CODE COMPLETE — LIVE VERIFICATION PENDING**
+State: **CODE COMPLETE — LIVE AI VERIFICATION PENDING**
 
-- Current phase: F12 reached; F5/F6/F7/F9 carry a `~` because no Firebase project
-  or Nano device was available.
-- Completed: all 13 phases as artifacts and code. 43 tests pass, typecheck,
-  boundary check, and production build pass.
+- Current phase: F12 reached. F6 (queue/sync) and F9 (security rules) are now
+  verified against Auth + Firestore emulators. F5/F7 still carry a `~` because
+  no Firebase AI project or Nano device was available.
+- Completed: all 13 phases as artifacts and code. 44 unit tests, 11 emulator
+  rules tests, a browser walkthrough, typecheck, boundary check, and production
+  build pass.
 - Skills used: see `docs/state/skill-audit.md`. `skill-crucible` scores are
   absent; no third-party skill script touched rules/auth/secrets.
 - Open blockers:
   1. `VITE_FIREBASE_*` not provided → cloud inference and Firestore sync
      unexecuted.
   2. No Chrome 139+ Nano profile → on-device path unexecuted.
-  3. No Firebase emulator/Java → rules tests are a pure mirror, not emulator
-     proof.
-- Repository: pushed to `Dikaaff/LENTERA` at `b8e9372`; headless Chrome boot
-  check passed.
+  3. No deployed project → reCAPTCHA Enterprise, hosting, and live conflict
+     behavior across two devices remain unverified.
+- Repository: pushed to `Dikaaff/LENTERA`; headless Chrome boot check passed.
+- Verified end-to-end locally: capture → consent → manual fallback → save →
+  Firestore emulator sync (`terkirim`) → reload → map.
 - Exact next action:
-  1. Fill `.env.local`, run `npm run dev`, register the App Check debug token.
-  2. Capture the Network evidence and the Nano download.
+  1. Fill real `VITE_FIREBASE_*`, register the App Check debug token.
+  2. Remove `VITE_DISABLE_AI`, capture Network evidence and the Nano download.
   3. Run the 12-case prompt suite on cloud, then on device, and fill
      `docs/prompts/metrics.md`.
-  4. Add emulator rules tests and deploy `firestore.rules`.
+  4. Deploy `firestore.rules`, seed `coordinators/{uid}`, enforce App Check.
 
 ## Resume protocol
 

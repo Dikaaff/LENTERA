@@ -49,10 +49,12 @@ survive when the network does not."
 ```bash
 npm run dev         # local app
 npm run typecheck   # tsc -b
-npm run test        # vitest (unit + rules)
+npm run test        # vitest unit tests (43)
+npm run test:rules  # Firestore emulator rules tests (11, needs Java 17+)
 npm run boundaries  # dependency-cruiser
 npm run build       # production build
 npm run check       # typecheck + test + boundaries
+git status          # .env.local and .tools/ must stay untracked
 ```
 
 ## Module map

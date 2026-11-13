@@ -13,9 +13,18 @@ Accuracy and latency are deliberately blank, not guessed.
 | `sitrep.cluster.v1` | cloud | not executed            | depends on report count | unknown           | not measured | none observed                 |
 | `sitrep.daily.v1`   | cloud | not executed            | depends on cluster size | unknown           | not measured | none observed                 |
 
+## Local verification that did run (not model quality)
+
+- Firestore Auth + emulator walkthrough with `VITE_DISABLE_AI=1`:
+  capture → consent → manual fallback card → save → Firestore write →
+  `terkirim` → reload persistence → map. Screenshots in `docs/evidence/`.
+- 11 emulator rules tests pass.
+- This proves the queue, sync, and rules halves. It does **not** measure a
+  model, because `VITE_DISABLE_AI=1` short-circuits `runTask` before any AI call.
+
 ## Automated checks that did run
 
-- 43 unit tests pass, including:
+- 44 unit tests pass, including:
   - injection defense string present verbatim;
   - all four adversarial notes stay under the 2,600-token budget;
   - schema rejects unknown keys and enum values;
@@ -34,6 +43,7 @@ Accuracy and latency are deliberately blank, not guessed.
 4. Repeat on Chrome 139+ with Nano. Record `inferenceSource` for every call.
 5. A/B table goes verbatim into the README. Below 90% extraction accuracy means
    the artifact is not wired into the UI.
+6. Remove `VITE_DISABLE_AI` before measuring; it exists only for local E2E.
 
 ## Known limitation
 

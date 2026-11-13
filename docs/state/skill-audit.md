@@ -21,7 +21,7 @@ reviewed in-repo.
 | wizard                     | mattpocock/skills       | scripts/setup.sh                        | applied                      |
 | setup-pre-commit           | mattpocock/skills       | Husky + lint-staged                     | applied                      |
 | git-guardrails-claude-code | mattpocock/skills       | destructive-command rules               | documented in AGENTS.md      |
-| tdd                        | mattpocock/skills       | tests before wiring UI                  | 43 tests                     |
+| tdd                        | mattpocock/skills       | tests before wiring UI                  | 44 tests                     |
 | prototype                  | mattpocock/skills       | mode-behavior reasoning                 | no harness run (no Firebase) |
 | diagnosing-bugs            | mattpocock/skills       | test failure root causes                | used during test repair      |
 | impeccable                 | preloaded               | design critique rules                   | applied to UI                |

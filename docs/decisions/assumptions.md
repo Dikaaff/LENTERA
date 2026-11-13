@@ -10,8 +10,8 @@ Date: 2026-11-13.
 2. **No Nano-capable Chrome.** On-device inference could not be run. All local
    path findings are documented as unexecuted in
    `docs/research/local-language-findings.md`.
-3. **GitHub CLI is not authenticated.** Pushes were attempted; local commits
-   remain the source of truth. See `progress.md` push log.
+3. **GitHub CLI is not authenticated, but git push works** through a cached
+   credential. Both commits reached `Dikaaff/LENTERA`; see `progress.md`.
 4. **Windows + Git Bash.** Commands use POSIX syntax; no PowerShell.
 
 ## Skill substitutions
@@ -53,10 +53,14 @@ Consequences:
 4. **On-device temperature is not configurable.** Firebase JS SDK v13 only
    exposes `temperature` in `inCloudParams.generationConfig`. The prompt carries
    determinism instructions instead.
-5. **Rules proof is a pure mirror, not an emulator run.** Emulator tests need
-   Java and `@firebase/rules-unit-testing`; neither was installed.
+5. **Rules are now proven twice.** A pure mirror is unit-tested, and 11 real
+   Firestore emulator tests run with a project-local JRE 21. The JRE and
+   emulator cache live in `.tools/` and the user profile cache, both untracked.
 6. **Skill audit scores are absent.** `skill-crucible` was not executed against
    40 skill folders. No third-party skill script was allowed near
    `firestore.rules`, auth, or secrets; those were written and reviewed directly.
 7. **No live A/B metric.** See `docs/prompts/metrics.md`; numbers are blank by
    design rather than fabricated.
+8. **E2E runs with AI disabled.** `VITE_DISABLE_AI=1` exercises the manual
+   fallback and the queue/sync path without a model. It is not a model test and
+   is labelled as such in the README.

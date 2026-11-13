@@ -15,5 +15,11 @@ export const heldCount = (reports: Pick<ReportRecord, "status">[]) =>
     .length;
 
 /** Last-write-wins is prevented: a newer remote copy flags a human decision. */
-export const resolveRemote = (local: ReportRecord, remote: Pick<ReportRecord, "updatedAt">) =>
-  remote.updatedAt > local.updatedAt && local.status !== "synced" ? "conflict" : local.status;
+export const resolveRemote = (
+  local: ReportRecord,
+  remote: Pick<ReportRecord, "updatedAt">,
+): ReportStatus => {
+  if (remote.updatedAt > local.updatedAt && local.status !== "synced") return "conflict";
+  if (remote.updatedAt < local.updatedAt) return local.status;
+  return "synced";
+};

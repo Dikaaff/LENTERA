@@ -112,6 +112,14 @@ export async function runTask<K extends TaskName>(
     reason += " Lokal saja sampai persetujuan cloud diberikan.";
   }
 
+  if (import.meta.env.VITE_DISABLE_AI === "1") {
+    return unavailable(
+      "AI dinonaktifkan untuk uji lokal. Isi kolom manual; catatan tetap tersimpan.",
+      started,
+      taskName,
+    );
+  }
+
   const cloudOnly = mode === "ONLY_IN_CLOUD" || mode === "PREFER_IN_CLOUD";
   if (cloudOnly && !options.consentToCloud) {
     return unavailable("Persetujuan cloud belum diberikan.", started, taskName);

@@ -7,7 +7,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Input, Label, Select, Textarea } from "@/components/ui/field";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { deviceId } from "@/lib/device";
-import { useAuthUser } from "@/modules/auth";
+import { ensureVolunteer, useAuthUser } from "@/modules/auth";
 import { runTask, type InferenceResult } from "@/modules/inference";
 import { regions } from "@/modules/map/geometry";
 import { saveReport } from "@/modules/queue";
@@ -110,7 +110,7 @@ export function CaptureScreen() {
     void process(consent);
   };
 
-  const save = () => {
+  const save = async () => {
     if (!extraction) return;
     const meta: InferenceMeta = inference ?? {
       path: "unavailable",
@@ -120,12 +120,13 @@ export function CaptureScreen() {
       reason: "Diisi manual oleh relawan.",
       retried: false,
     };
+    const volunteer = isFirebaseConfigured ? await ensureVolunteer() : null;
     const record = saveReport({
       rawNote: note,
       photo,
       post,
       region,
-      reporterId: user?.uid ?? deviceId(),
+      reporterId: volunteer?.uid ?? user?.uid ?? deviceId(),
       extraction,
       inference: meta,
       needsReview,
@@ -247,7 +248,7 @@ export function CaptureScreen() {
       {extraction && (
         <>
           <ExtractionCard value={extraction} onChange={setExtraction} />
-          <Button className="w-full" onClick={save}>
+          <Button className="w-full" onClick={() => void save()}>
             Simpan ke antrean
           </Button>
         </>

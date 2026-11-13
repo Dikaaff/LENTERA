@@ -1,5 +1,6 @@
 import {
   GoogleAuthProvider,
+  connectAuthEmulator,
   getAuth,
   onAuthStateChanged,
   signInAnonymously,
@@ -15,9 +16,17 @@ export type Role = "relawan" | "koordinator" | "tamu";
 export const roleOf = (user: User | null): Role =>
   !user ? "tamu" : user.isAnonymous ? "relawan" : "koordinator";
 
+let emulatorConnected = false;
+
 const auth = () => {
   const app = getFirebaseApp();
-  return app ? getAuth(app) : null;
+  if (!app) return null;
+  const instance = getAuth(app);
+  if (import.meta.env.VITE_USE_EMULATORS === "1" && !emulatorConnected) {
+    connectAuthEmulator(instance, "http://127.0.0.1:9099", { disableWarnings: true });
+    emulatorConnected = true;
+  }
+  return instance;
 };
 
 export async function ensureVolunteer(): Promise<User | null> {

@@ -4,13 +4,15 @@ Date: 2026-11-13.
 
 ## Commands actually run
 
-| Command                         | Result                                                      | Evidence                  |
-| ------------------------------- | ----------------------------------------------------------- | ------------------------- |
-| `npm run typecheck`             | pass, 0 errors                                              | exit 0                    |
-| `npm run test`                  | 7 files, 43 tests passed                                    | Vitest output             |
-| `npm run boundaries`            | 0 violations, 56 modules, 122 deps                          | dependency-cruiser output |
-| `npm run build`                 | pass, PWA precache 9 entries                                | dist generated            |     | `git status --short` | no `.env` staged | see security evidence |
-| `npm run dev` + headless Chrome | HTTP 200; all four tabs rendered; local-only banner visible | DOM dump                  |
+| Command                         | Result                                | Evidence                    |
+| ------------------------------- | ------------------------------------- | --------------------------- |
+| `npm run typecheck`             | pass, 0 errors                        | exit 0                      |
+| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output               |
+| `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest |
+| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser          |
+| `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                     |
+| `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                    |
+| emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`   |
 
 ## What the tests cover
 
@@ -22,11 +24,28 @@ Date: 2026-11-13.
   long note stay under 2,600 estimated tokens; 12-case tables exist.
 - Routing: local default, cloud retry after invalid local output, over-budget
   note goes straight to cloud, no-consent downgrade, cloud-only refusal.
-- Queue survives a module reload; same-ID write does not duplicate.
+- Queue survives a module reload; same-ID write does not duplicate; a remote
+  acknowledgement becomes `synced`; a newer remote copy becomes `conflict`.
 - SITREP: word counting, claim-with-source filter, low-confidence cluster split,
   sanitized cloud payload excludes raw notes/photo/reporter id.
-- Access mirror: cross-volunteer read denied, synced edit denied, coordinator
+- Rules mirror: cross-volunteer read denied, synced edit denied, coordinator
   region scoping, no delete.
+- **Real emulator rules:** volunteer A reads own report; volunteer B is denied;
+  unauthenticated is denied; create-for-someone-else is denied; raw note/photo
+  fields are rejected; synced edit is denied; delete is denied; coordinator
+  reads own region only; coordinator may flag but not rewrite; unverified
+  coordinator token is denied.
+- **Browser E2E:** consent gate appears, local fallback renders an editable card,
+  save reaches Firestore emulator, badge becomes `terkirim`, held count returns
+  to 0, reload keeps the report, map renders the province with 1 report.
+
+## Bug found and fixed by the walkthrough
+
+Firestore does not emit a listener update when only metadata changes, so a
+successful upload left the local badge at `menunggu` forever. `watchReport` now
+passes `{ includeMetadataChanges: true }`. The walkthrough also exposed that a
+reload did not resume pending uploads; `resumeSync` now runs after sign-in on
+boot.
 
 ## `grill-me` style attack results (recorded, not model-executed)
 
@@ -47,15 +66,14 @@ Date: 2026-11-13.
 
 ## Not verified
 
-- No live model call, no Network-tab capture, no Nano download, no emulator
-  rules run, no Firebase deployment.
-- No interactive browser walkthrough was performed: the app was rendered once
-  in headless Chrome to confirm the four tabs and the local-only banner mount.
-  No click-through of capture → queue → SITREP was executed.
-- No E2E test of the capture → queue → sync flow.
+- No live model call (cloud or Nano), therefore no accuracy, A/B, latency, or
+  Network-tab zero-request evidence.
+- No Nano download screenshot; no Chrome 139+ profile.
+- No two-device conflict reproduction; conflict logic is unit-tested only.
+- No Firebase deployment and no reCAPTCHA Enterprise enforcement.
 
 ## Gate status
 
-Code-level gates pass. The product-level gate in section 8 of the master prompt
-is **not** complete until a Firebase project and a Nano-capable Chrome are
-attached and the evidence items are captured.
+Data, queue, rules, and the manual fallback are verified end-to-end against the
+emulator. The AI-quality gate is **not** complete until a Firebase project and a
+Nano-capable Chrome are attached.

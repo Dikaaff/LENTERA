@@ -1,5 +1,6 @@
 import { getAuth } from "firebase/auth";
 import {
+  connectFirestoreEmulator,
   doc,
   getFirestore,
   initializeFirestore,
@@ -28,6 +29,9 @@ export function firestore(): Firestore | null {
   } catch {
     database = getFirestore(app);
   }
+  if (import.meta.env.VITE_USE_EMULATORS === "1") {
+    connectFirestoreEmulator(database, "127.0.0.1", 8080);
+  }
   return database;
 }
 
@@ -46,14 +50,24 @@ const toRemote = (report: ReportRecord) => ({
 });
 
 export async function pushReport(report: ReportRecord): Promise<boolean> {
-  const db = firestore();
+  let db: Firestore | null = null;
+  try {
+    db = firestore();
+  } catch (error) {
+    console.error("[lentera] firestore init gagal", error);
+    return false;
+  }
   if (!db) return false;
   const user = getAuth(getFirebaseApp()!).currentUser;
-  if (!user) return false;
+  if (!user) {
+    console.error("[lentera] sync dilewati: belum ada pengguna auth");
+    return false;
+  }
   try {
     await setDoc(doc(db, "reports", report.id), toRemote(report), { merge: true });
     return true;
-  } catch {
+  } catch (error) {
+    console.error("[lentera] push gagal", error);
     return false;
   }
 }
@@ -61,9 +75,14 @@ export async function pushReport(report: ReportRecord): Promise<boolean> {
 export function watchReport(id: string, onRemote: (updatedAt: number) => void): () => void {
   const db = firestore();
   if (!db) return () => undefined;
-  return onSnapshot(doc(db, "reports", id), (snapshot) => {
-    if (!snapshot.exists() || snapshot.metadata.fromCache) return;
-    const value: unknown = snapshot.data().updatedAt;
-    onRemote(typeof value === "number" ? value : 0);
-  });
+  return onSnapshot(
+    doc(db, "reports", id),
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      if (!snapshot.exists() || snapshot.metadata.fromCache) return;
+      const value: unknown = snapshot.data().updatedAt;
+      onRemote(typeof value === "number" ? value : 0);
+    },
+    (error) => console.error("[lentera] watch gagal", error),
+  );
 }

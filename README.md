@@ -86,9 +86,34 @@ editing, queue, export, and map work; AI and sync say they are unavailable
 instead of pretending. That is intentional.
 
 ```bash
-npm run check   # typecheck + 43 tests + boundaries
+npm run check   # typecheck + 44 unit tests + boundaries
 npm run build   # production PWA build
 ```
+
+### Local emulator verification
+
+No Firebase project is required for the data and rules halves. Java 17+ is
+needed for the Firestore emulator.
+
+```bash
+npm run test:rules   # 11 real emulator rules tests
+```
+
+For the browser walkthrough, start the app in emulator mode (it loads the
+committed `.env.emulator`; production builds never see these values), then run
+the emulator-backed script in a second terminal:
+
+```bash
+npm run dev:emulator      # terminal 1
+
+# terminal 2
+npx firebase emulators:exec --only auth,firestore --project lentera-demo \
+  "node scripts/e2e-smoke.mjs"
+```
+
+It drives capture → local fallback → save → Firestore sync (`terkirim`) →
+reload → map, and writes screenshots to `docs/evidence/`. `VITE_DISABLE_AI=1`
+skips model calls so this test exercises the manual fallback, not model quality.
 
 ### Firebase setup
 
@@ -133,8 +158,20 @@ routing ceiling. See `docs/prompts/metrics.md`.
 
 ## Evidence and honesty
 
-**Measured in this repo:** 43 unit tests pass; typecheck passes; dependency
-boundaries pass; production build passes.
+**Measured in this repo:**
+
+- 44 unit tests pass; typecheck, dependency boundaries, and production build pass.
+- 11 Firestore emulator rules tests pass, including cross-volunteer denial and
+  synced-report edit denial.
+- Headless Chrome walkthrough passes: capture → consent → manual fallback →
+  save → Firestore emulator sync (`terkirim`) → reload persistence → map.
+  Evidence: [queue](docs/evidence/e2e-antrean.png) and
+  [map](docs/evidence/e2e-peta.png).
+
+A real bug was found by that walkthrough and fixed: Firestore metadata-only
+changes do not fire a listener by default, so a successful upload never flipped
+to `terkirim`. `watchReport` now uses `includeMetadataChanges: true`, and the
+sync-resume path runs on boot after sign-in.
 
 **Not measured, because no Firebase project or Nano device was attached to the
 build session:**
@@ -143,8 +180,7 @@ build session:**
 - local vs cloud A/B numbers,
 - zero-request Network-tab proof for the local path,
 - Nano download screenshot,
-- emulator rules run,
-- real sync/conflict behavior across two devices.
+- real conflict behavior across two devices.
 
 These are marked pending in `docs/prompts/metrics.md`, `docs/qa.md`, and
 `docs/security/evidence.md` rather than claimed. The exact procedure to produce
@@ -172,7 +208,9 @@ src/modules/inference/__tests__      routing, validation, retry, consent
 src/modules/inference/prompts/__tests__  injection, budget, adversarial cases
 src/modules/queue/__tests__          offline persistence, idempotent writes
 src/modules/sitrep/__tests__         word cap, claims, cluster confidence
-src/modules/security/__tests__       cross-volunteer denial, synced edit denial
+src/modules/security/__tests__       rules mirror: cross-volunteer denial
+tests/rules.emulator.test.ts        11 real emulator rules tests
+scripts/e2e-smoke.mjs               capture → queue → sync → reload → map
 ```
 
 ## Repo map

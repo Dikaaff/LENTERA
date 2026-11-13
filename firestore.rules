@@ -8,7 +8,7 @@ service cloud.firestore {
 
     function coordinatorFor(region) {
       return signedIn()
-        && request.auth.token.email_verified == true
+        && request.auth.token.get('email_verified', false) == true
         && exists(/databases/$(database)/documents/coordinators/$(request.auth.uid))
         && get(/databases/$(database)/documents/coordinators/$(request.auth.uid)).data.region == region;
     }
@@ -30,19 +30,16 @@ service cloud.firestore {
         || coordinatorFor(resource.data.region)
       );
 
-      // A volunteer never edits a synced report. A coordinator may only flag it.
-      allow update: if signedIn() && (
-        (
-          resource.data.reporterId == request.auth.uid
-          && resource.data.status != 'synced'
-          && request.resource.data.reporterId == request.auth.uid
-          && noLocalOnlyFields()
-        )
-        || (
-          coordinatorFor(resource.data.region)
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['needsReview'])
-        )
-      );
+      // A volunteer never edits a synced report.
+      allow update: if signedIn()
+        && resource.data.reporterId == request.auth.uid
+        && resource.data.status != 'synced'
+        && request.resource.data.reporterId == request.auth.uid
+        && noLocalOnlyFields();
+
+      // A coordinator may only flag a report in their own region.
+      allow update: if coordinatorFor(resource.data.region)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['needsReview']);
 
       allow delete: if false;
     }
