@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function coordinatorFor(region) {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/coordinators/$(request.auth.uid))
+        && get(/databases/$(database)/documents/coordinators/$(request.auth.uid)).data.region == region;
+    }
+
+    function noLocalOnlyFields() {
+      return !request.resource.data.keys().hasAny(['rawNote', 'photo', 'reporterName', 'reporterPhone']);
+    }
+
+    match /reports/{reportId} {
+      // A volunteer creates only their own report, in a pre-sync state.
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.status in ['draft', 'queued']
+        && noLocalOnlyFields();
+
+      // Owner reads own reports; a coordinator reads only their region.
+      allow read: if signedIn() && (
+        resource.data.reporterId == request.auth.uid
+        || coordinatorFor(resource.data.region)
+      );
+
+      // A volunteer never edits a synced report. A coordinator may only flag it.
+      allow update: if signedIn() && (
+        (
+          resource.data.reporterId == request.auth.uid
+          && resource.data.status != 'synced'
+          && request.resource.data.reporterId == request.auth.uid
+          && noLocalOnlyFields()
+        )
+        || (
+          coordinatorFor(resource.data.region)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['needsReview'])
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Region assignments are provisioned by an operator; clients never write them.
+    match /coordinators/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

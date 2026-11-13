@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #0b0f0e;
+  --color-surface: #141b19;
+  --color-line: #2a3532;
+  --color-ink: #eef4f0;
+  --color-muted: #9aa8a2;
+  --color-amber: #ffb020;
+  --color-emergency: #ff5347;
+  --color-synced: #43c08a;
+
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-base);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes blur-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.blur-fade {
+  animation: blur-fade-in 280ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
