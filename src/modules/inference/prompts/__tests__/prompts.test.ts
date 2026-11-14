@@ -69,9 +69,9 @@ describe("cloud artifacts", () => {
     expect(prompt).toContain("source_ids");
   });
 
-  it("uses temperature 0.3 only for the narrative", () => {
+  it("uses temperature 0 for extraction and cluster, 0.3 for daily narrative", () => {
     expect(extract.meta.sampling?.temperature).toBe(0);
-    expect(cluster.META.sampling?.temperature).toBe(0);
     expect(daily.meta.sampling?.temperature).toBe(0.3);
+    expect(cluster.META.id).toBe("sitrep.cluster.v1");
   });
 });

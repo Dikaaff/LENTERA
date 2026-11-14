@@ -92,7 +92,10 @@ function Shell({ role }: { role: string }) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           {" "}
-          <Badge tone={ROLE_COLORS[role] ?? "neutral"} as const className="mr-1">
+          <Badge
+            tone={ROLE_COLORS[role] === "emergency" ? "danger" : (ROLE_COLORS[role] ?? "neutral")}
+            className="mr-1"
+          >
             {role === "koordinator" && <ShieldCheck className="mr-1 size-3" />}
             {role}
           </Badge>

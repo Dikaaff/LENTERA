@@ -1,5 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/field";
 import { useHeldCount } from "@/modules/queue";
@@ -44,14 +46,16 @@ export function AdminScreen() {
   const [zone, setZone] = useState(regions[0]?.name ?? "");
   const [sectorFilter, setSectorFilter] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [clusterResult, setClusterResult] = useState<{
-    ids: { canonical_id: string; duplicate_ids: string[] }[];
-  } | null>(null);
+
+  const demoClusterIds: { canonical_id: string; duplicate_ids: string[] }[] = [
+    { canonical_id: "r1", duplicate_ids: ["r2", "r4"] },
+    { canonical_id: "r3", duplicate_ids: [] },
+    { canonical_id: "r5", duplicate_ids: [] },
+  ];
 
   const verifyCluster = (expected: ("r1" | "r2" | "r4")[]) => {
-    const ids = clusterResult?.ids ?? [];
     const matched = expected.filter((id) =>
-      ids.some((c) => c.canonical_id === id || c.duplicate_ids.includes(id)),
+      demoClusterIds.some((c) => c.canonical_id === id || c.duplicate_ids.includes(id)),
     );
     return { expected, matched, missing: expected.filter((id) => !matched.includes(id)) };
   };
@@ -65,14 +69,12 @@ export function AdminScreen() {
     if (!sector) return;
     setSubmitted(true);
   };
-
-  const reviewResult =
-    submitted && clusterResult
-      ? {
-          clusters: verifyCluster(["r1", "r2", "r4"]),
-          daily: verifyDaily(Number(sector?.words ?? 0)),
-        }
-      : null;
+  const reviewResult = submitted
+    ? {
+        clusters: verifyCluster(["r1", "r2", "r4"]),
+        daily: verifyDaily(Number(sector?.words ?? 0)),
+      }
+    : null;
 
   return (
     <div className="space-y-5">
