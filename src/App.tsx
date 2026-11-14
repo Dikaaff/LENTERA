@@ -82,9 +82,7 @@ function Shell({ role }: { role: string }) {
     <div className="mx-auto flex h-dvh max-w-md flex-col border-x border-line bg-base">
       <header className="flex items-center gap-3 px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex size-7 items-center justify-center rounded-xl bg-amber/20">
-            <PenLine className="size-4 text-amber" />
-          </div>
+          <img src="/logo.svg" alt="LENTERA" className="size-6 shrink-0" />
           <div className="min-w-0">
             <p className="text-sm font-bold tracking-tight">LENTERA</p>
             <p className="truncate text-[11px] text-muted">Laporan lapangan</p>
