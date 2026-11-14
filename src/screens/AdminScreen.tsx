@@ -1,18 +1,9 @@
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/field";
-import { useHeldCount, useReports } from "@/modules/queue";
+import { useHeldCount } from "@/modules/queue";
 import { regions } from "@/modules/map/geometry";
-
-const HEADING: Record<string, string> = {
-  overview: "Ringkasan",
-  most_urgent: "Kebutuhan paling mendesak",
-  affected: "Wilayah paling terdampak",
-  gaps: "Celah data",
-};
 
 const TRACK_LIST = [
   {
@@ -53,10 +44,12 @@ export function AdminScreen() {
   const [zone, setZone] = useState(regions[0]?.name ?? "");
   const [sectorFilter, setSectorFilter] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const reports = useReports();
+  const [clusterResult, setClusterResult] = useState<{
+    ids: { canonical_id: string; duplicate_ids: string[] }[];
+  } | null>(null);
 
   const verifyCluster = (expected: ("r1" | "r2" | "r4")[]) => {
-    const ids = cluster?.clusters ?? [];
+    const ids = clusterResult?.ids ?? [];
     const matched = expected.filter((id) =>
       ids.some((c) => c.canonical_id === id || c.duplicate_ids.includes(id)),
     );
@@ -73,12 +66,13 @@ export function AdminScreen() {
     setSubmitted(true);
   };
 
-  const reviewResult = submitted
-    ? {
-        clusters: verifyCluster(["r1", "r2", "r4"]),
-        daily: verifyDaily(Number(sector?.words ?? 0)),
-      }
-    : null;
+  const reviewResult =
+    submitted && clusterResult
+      ? {
+          clusters: verifyCluster(["r1", "r2", "r4"]),
+          daily: verifyDaily(Number(sector?.words ?? 0)),
+        }
+      : null;
 
   return (
     <div className="space-y-5">
@@ -100,7 +94,7 @@ export function AdminScreen() {
         <Card>
           <CardBody className="space-y-1">
             <Label>Total laporan tersanitasi</Label>
-            <p className="text-lg font-bold tabular-nums">{sanitized.length}</p>
+            <p className="text-lg font-bold tabular-nums">{held}</p>
             <p className="text-xs text-muted">Siap diproses cloud</p>
           </CardBody>
         </Card>

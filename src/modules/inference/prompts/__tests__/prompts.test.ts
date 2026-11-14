@@ -70,8 +70,8 @@ describe("cloud artifacts", () => {
   });
 
   it("uses temperature 0.3 only for the narrative", () => {
-    expect(extract.meta.sampling.temperature).toBe(0);
+    expect(extract.meta.sampling?.temperature).toBe(0);
     expect(cluster.META.sampling?.temperature).toBe(0);
-    expect(daily.meta.sampling.temperature).toBe(0.3);
+    expect(daily.meta.sampling?.temperature).toBe(0.3);
   });
 });

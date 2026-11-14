@@ -15,13 +15,7 @@ import { StatusBar } from "@/components/StatusBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
-import {
-  ensureVolunteer,
-  signInCoordinator,
-  signOut as firebaseSignOut,
-  useAuthUser,
-} from "@/modules/auth";
+import { ensureVolunteer, signOut as firebaseSignOut, useAuthUser } from "@/modules/auth";
 import { resumeSync } from "@/modules/queue";
 import { CaptureScreen } from "@/screens/CaptureScreen";
 import { MapScreen } from "@/screens/MapScreen";
@@ -98,10 +92,7 @@ function Shell({ role }: { role: string }) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           {" "}
-          <Badge
-            tone={ROLE_COLORS[role] as "synced" | "neutral" | "amber" | "danger" | undefined}
-            className="mr-1"
-          >
+          <Badge tone={ROLE_COLORS[role] ?? "neutral"} as const className="mr-1">
             {role === "koordinator" && <ShieldCheck className="mr-1 size-3" />}
             {role}
           </Badge>
