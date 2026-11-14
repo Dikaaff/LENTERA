@@ -1,7 +1,6 @@
 import {
   ClipboardList,
   FileText,
-  LogIn,
   LogOut,
   Map,
   PenLine,
@@ -9,19 +8,26 @@ import {
   User as UserIcon,
   Users,
 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, Route, Routes } from "react-router-dom";
 import { StatusBar } from "@/components/StatusBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
-import { ensureVolunteer, signOut as firebaseSignOut, useAuthUser } from "@/modules/auth";
+import {
+  ensureVolunteer,
+  signInCoordinator,
+  signOut as firebaseSignOut,
+  useAuthUser,
+} from "@/modules/auth";
 import { resumeSync } from "@/modules/queue";
 import { CaptureScreen } from "@/screens/CaptureScreen";
 import { MapScreen } from "@/screens/MapScreen";
 import { QueueScreen } from "@/screens/QueueScreen";
 import { SitrepScreen } from "@/screens/SitrepScreen";
 import { AdminScreen } from "@/screens/AdminScreen";
+import { LoginScreen } from "@/screens/LoginScreen";
 
 const NAV = [
   { to: "/", label: "Isi", icon: PenLine },
@@ -40,19 +46,17 @@ export default function App() {
   const role = useAuthUser().role;
   return (
     <Routes>
-      <Route element={<Shell role={role} />}>
-        {role !== "tamu" ? (
-          <>
-            <Route index element={<CaptureScreen />} />
-            <Route path="antrean" element={<QueueScreen />} />
-            <Route path="peta" element={<MapScreen />} />
-            <Route path="sitrep" element={<SitrepScreen />} />
-            {role === "koordinator" && <Route path="admin" element={<AdminScreen />} />}
-          </>
-        ) : (
-          <Route path="*" element={<LockedScreen />} />
-        )}
-      </Route>
+      {role !== "tamu" ? (
+        <Route element={<Shell role={role} />}>
+          <Route index element={<CaptureScreen />} />
+          <Route path="antrean" element={<QueueScreen />} />
+          <Route path="peta" element={<MapScreen />} />
+          <Route path="sitrep" element={<SitrepScreen />} />
+          {role === "koordinator" && <Route path="admin" element={<AdminScreen />} />}
+        </Route>
+      ) : (
+        <Route path="*" element={<LoginScreen />} />
+      )}
     </Routes>
   );
 }
@@ -134,6 +138,19 @@ function Shell({ role }: { role: string }) {
                 >
                   <LogOut className="size-4" /> Keluar
                 </Button>
+                {role === "relawan" && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      void signInCoordinator();
+                    }}
+                  >
+                    <Users className="size-4" /> Naikkan ke koordinator
+                  </Button>
+                )}
               </>
             )}
             {isAdmin && (
@@ -176,25 +193,6 @@ function Shell({ role }: { role: string }) {
           </NavLink>
         ))}
       </nav>
-    </div>
-  );
-}
-
-function LockedScreen() {
-  return (
-    <div className="mx-auto mt-20 flex max-w-md flex-col items-center text-center">
-      <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-base border border-line">
-        <ShieldCheck className="size-10 text-muted" />
-      </div>
-      <h1 className="text-lg font-bold tracking-tight">Akses terbatas</h1>
-      <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
-        Fitur LENTERA tersedia untuk relawan terdaftar dan koordinator yang sedang masuk.
-      </p>
-      <div className="mt-6 flex gap-3">
-        <Button variant="secondary" onClick={() => firebaseSignOut()} className="flex-1">
-          <LogIn className="size-4" /> Masuk sebagai relawan
-        </Button>
-      </div>
     </div>
   );
 }
