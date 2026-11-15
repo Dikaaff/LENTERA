@@ -11,10 +11,10 @@ import {
 import { useEffect, useState } from "react";
 import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase";
 
-export type Role = "relawan" | "koordinator" | "tamu";
+export type Role = "relawan" | "admin" | "tamu";
 
 export const roleOf = (user: User | null): Role =>
-  !user ? "tamu" : user.isAnonymous ? "relawan" : "koordinator";
+  !user ? "tamu" : user.isAnonymous ? "relawan" : "admin";
 
 let emulatorConnected = false;
 
@@ -41,53 +41,53 @@ export async function ensureVolunteer(): Promise<User | null> {
   }
 }
 
-export async function signInCoordinator(): Promise<void> {
+export async function signInAdmin(): Promise<void> {
   const instance = auth();
   if (!instance) return;
   await signInWithPopup(instance, new GoogleAuthProvider());
-  setCoordinatorLocal(true);
+  setAdminLocal(true);
 }
 
 export async function signOut() {
   const instance = auth();
   if (instance) await firebaseSignOut(instance);
-  clearCoordinatorLocal();
+  clearAdminLocal();
 }
 
-const COORDINATOR_PIN = "12345678";
-const COORDINATOR_MARKER = "lentera_coordinator_pin";
+const ADMIN_PIN = "12345678";
+const ADMIN_MARKER = "lentera_admin_pin";
 
-export { COORDINATOR_PIN };
+export { ADMIN_PIN };
 
-export function setCoordinatorLocal(ok: boolean) {
+export function setAdminLocal(ok: boolean) {
   if (typeof window === "undefined") return;
   if (ok) {
     try {
-      localStorage.setItem(COORDINATOR_MARKER, "1");
+      localStorage.setItem(ADMIN_MARKER, "1");
     } catch {}
   } else {
     try {
-      localStorage.removeItem(COORDINATOR_MARKER);
+      localStorage.removeItem(ADMIN_MARKER);
     } catch {}
   }
 }
 
-export function clearCoordinatorLocal() {
-  setCoordinatorLocal(false);
+export function clearAdminLocal() {
+  setAdminLocal(false);
 }
 
-export function isCoordinatorLocal(): boolean {
+export function isAdminLocal(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(COORDINATOR_MARKER) === "1";
+    return localStorage.getItem(ADMIN_MARKER) === "1";
   } catch {
     return false;
   }
 }
 
-export async function signInCoordinatorWithPin(pin: string): Promise<boolean> {
-  if (pin !== COORDINATOR_PIN) return false;
-  setCoordinatorLocal(true);
+export async function signInAdminWithPin(pin: string): Promise<boolean> {
+  if (pin !== ADMIN_PIN) return false;
+  setAdminLocal(true);
   const instance = auth();
   if (!instance) return true;
   if (!instance.currentUser) {
@@ -116,7 +116,7 @@ export function useAuthUser() {
     });
   }, []);
 
-  const localCoordinator = isCoordinatorLocal();
-  const role = !user ? "tamu" : localCoordinator || !user.isAnonymous ? "koordinator" : "relawan";
+  const localAdmin = isAdminLocal();
+  const role = !user ? "tamu" : localAdmin || !user.isAnonymous ? "admin" : "relawan";
   return { user, loading, role };
 }

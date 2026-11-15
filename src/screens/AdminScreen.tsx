@@ -62,7 +62,7 @@ export function AdminScreen() {
     words: 68,
     limit: 150,
     submitted: false,
-    note: "SITREP hari ini belum dikirim. Koordinator dapat menyusun laporan sebelum batas kata.",
+    note: "SITREP hari ini belum dikirim. Admin dapat menyusun laporan sebelum batas kata.",
   };
 
   return (
@@ -73,13 +73,13 @@ export function AdminScreen() {
             <div className="flex size-8 items-center justify-center rounded-xl bg-amber/20">
               <ShieldCheck className="size-4 text-amber" />
             </div>
-            <h1 className="text-lg font-bold tracking-tight">Panel koordinator</h1>
+            <h1 className="text-lg font-bold tracking-tight">Panel admin</h1>
           </div>
           <p className="mt-1 text-sm text-muted">
-            Ringkasan laporan, antrean, dan SITREP dari sudut pandang koordinator.
+            Ringkasan laporan, antrean, dan SITREP dari sudut pandang admin.
           </p>
         </div>
-        <Badge tone="amber">koordinator</Badge>
+        <Badge tone="amber">admin</Badge>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2">
@@ -97,7 +97,7 @@ export function AdminScreen() {
                   : s.label === "Dalam antrean"
                     ? "Menunggu sinkronisasi cloud"
                     : s.label === "Ditahan verifikasi"
-                      ? "Menunggu koordinator tindak lanjuti"
+                      ? "Menunggu admin tindak lanjuti"
                       : "Wilayah dengan laporan masuk"}
               </p>
             </CardBody>

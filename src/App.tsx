@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import {
   ensureVolunteer,
-  signInCoordinator,
+  signInAdmin,
   signOut as firebaseSignOut,
   useAuthUser,
 } from "@/modules/auth";
@@ -38,7 +38,7 @@ const NAV = [
 
 const ROLE_COLORS: Record<string, "neutral" | "amber" | "emergency"> = {
   relawan: "neutral",
-  koordinator: "amber",
+  admin: "amber",
   tamu: "neutral",
 };
 
@@ -52,7 +52,7 @@ export default function App() {
           <Route path="antrean" element={<QueueScreen />} />
           <Route path="peta" element={<MapScreen />} />
           <Route path="sitrep" element={<SitrepScreen />} />
-          {role === "koordinator" && <Route path="admin" element={<AdminScreen />} />}
+          {role === "admin" && <Route path="admin" element={<AdminScreen />} />}
         </Route>
       ) : (
         <Route path="*" element={<LoginScreen />} />
@@ -64,7 +64,7 @@ export default function App() {
 function Shell({ role }: { role: string }) {
   const { user, loading } = useAuthUser();
   const [menuOpen, setMenuOpen] = useState(false);
-  const isAdmin = role === "koordinator";
+  const isAdmin = role === "admin";
 
   useEffect(() => {
     void ensureVolunteer().then(() => resumeSync());
@@ -98,7 +98,7 @@ function Shell({ role }: { role: string }) {
             tone={ROLE_COLORS[role] === "emergency" ? "danger" : (ROLE_COLORS[role] ?? "neutral")}
             className="mr-1"
           >
-            {role === "koordinator" && <ShieldCheck className="mr-1 size-3" />}
+            {role === "admin" && <ShieldCheck className="mr-1 size-3" />}
             {role}
           </Badge>
           <button
@@ -121,11 +121,11 @@ function Shell({ role }: { role: string }) {
                   <div className="flex size-10 items-center justify-center rounded-full bg-base" />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-ink">
-                      {user?.isAnonymous ? "Relawan lapangan" : "Koordinator"}
+                      {user?.isAnonymous ? "Relawan lapangan" : "Admin"}
                     </p>
                     <p className="text-[11px] font-mono text-muted">
-                      {role === "koordinator"
-                        ? (user?.displayName ?? "Koordinator")
+                      {role === "admin"
+                        ? (user?.displayName ?? "Admin")
                         : `ID: ${user?.uid?.slice(0, 12)}…`}
                     </p>
                   </div>
@@ -145,10 +145,10 @@ function Shell({ role }: { role: string }) {
                     className="w-full justify-start"
                     onClick={() => {
                       setMenuOpen(false);
-                      void signInCoordinator();
+                      void signInAdmin();
                     }}
                   >
-                    <Users className="size-4" /> Naikkan ke koordinator
+                    <Users className="size-4" /> Naikkan ke admin
                   </Button>
                 )}
               </>
@@ -161,7 +161,7 @@ function Shell({ role }: { role: string }) {
               >
                 <Users className="size-5 shrink-0 text-amber" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-ink">Panel koordinator</p>
+                  <p className="text-sm font-medium text-ink">Panel admin</p>
                   <p className="text-[11px] text-muted">Lihat laporan dan data wilayah</p>
                 </div>
               </NavLink>

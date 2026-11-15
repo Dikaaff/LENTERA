@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import {
-  signInCoordinator,
-  signInCoordinatorWithPin,
+  signInAdmin,
+  signInAdminWithPin,
   ensureVolunteer,
   useAuthUser,
 } from "@/modules/auth";
@@ -22,12 +22,12 @@ const PERAN = [
     btnVariant: "primary" as const,
   },
   {
-    id: "koordinator",
-    label: "Koordinator",
+    id: "admin",
+    label: "Admin",
     tagline: "Lihat laporan & panel data wilayah",
-    desc: "Akses panel koordinator untuk meninjau laporan, hasil deduplikasi, dan SITREP harian.",
+    desc: "Akses panel admin untuk meninjau laporan, hasil deduplikasi, dan SITREP harian.",
     icon: ShieldCheck,
-    btnLabel: "Masuk sebagai koordinator",
+    btnLabel: "Masuk sebagai admin",
     btnHint: " pakai Google",
     btnVariant: "secondary" as const,
   },
@@ -51,7 +51,7 @@ export function LoginScreen() {
               <ShieldCheck className="size-5 text-amber" />
             </div>
             <div>
-              <p className="text-lg font-bold tracking-tight">Halo, koordinator</p>
+              <p className="text-lg font-bold tracking-tight">Halo, admin</p>
               <p className="text-sm text-muted">
                 {user?.isAnonymous
                   ? "Teridentifikasi sebagai relawan otomatis."
@@ -139,7 +139,7 @@ export function LoginScreen() {
                     <Button
                       variant={p.btnVariant}
                       className="flex-1 justify-center gap-2"
-                      onClick={() => void signInCoordinator()}
+                      onClick={() => void signInAdmin()}
                     >
                       <Users className="size-4" /> {p.btnLabel}
                       <span className="text-[11px] text-muted">{p.btnHint}</span>
@@ -152,13 +152,14 @@ export function LoginScreen() {
         </div>
 
         <p className="text-center text-xs text-muted">
-          Relawan masuk otomatis tanpa akun. Koordinator butuh tautan Google.
+          Relawan masuk otomatis tanpa akun. Admin butuh tautan Google.
         </p>
 
         <div className="space-y-3 rounded-xl border border-line bg-base p-4">
           <p className="text-sm font-semibold text-ink">Akses koordinator (kode akses)</p>
           <p className="text-xs text-muted">
-            Masuk sebagai koordinator tanpa Google. Gunakan kode akses 8 digit yang diberikan oleh koordinator.
+            Masuk sebagai koordinator tanpa Google. Gunakan kode akses 8 digit yang diberikan oleh
+            koordinator.
           </p>
           <div className="flex gap-2">
             <Input
@@ -173,7 +174,7 @@ export function LoginScreen() {
               onClick={() => {
                 if (!pin) return;
                 setPinError("");
-                void signInCoordinatorWithPin(pin).then((ok) => {
+                void signInAdminWithPin(pin).then((ok) => {
                   if (!ok) {
                     setPinError("Kode akses tidak dikenal.");
                     return;
