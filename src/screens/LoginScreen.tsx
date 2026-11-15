@@ -158,15 +158,13 @@ export function LoginScreen() {
         <div className="space-y-3 rounded-xl border border-line bg-base p-4">
           <p className="text-sm font-semibold text-ink">Akses koordinator (kode akses)</p>
           <p className="text-xs text-muted">
-            {import.meta.env.VITE_COORDINATOR_PIN
-              ? "Masukkan kode akses untuk panel koordinator."
-              : "Kode akses belum diatur. Mohon hubungi koordinator."}
+            Masuk sebagai koordinator tanpa Google. Gunakan kode akses 8 digit yang diberikan oleh koordinator.
           </p>
           <div className="flex gap-2">
             <Input
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/D/g, "").slice(0, 8))}
-              placeholder="Kode akses"
+              placeholder="8 digit kode akses"
               maxLength={8}
               className="flex-1 tabular-nums tracking-wider"
             />
