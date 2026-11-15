@@ -54,7 +54,10 @@ export async function signOut() {
   clearCoordinatorLocal();
 }
 
+const COORDINATOR_PIN = "12345678";
 const COORDINATOR_MARKER = "lentera_coordinator_pin";
+
+export { COORDINATOR_PIN };
 
 export function setCoordinatorLocal(ok: boolean) {
   if (typeof window === "undefined") return;
@@ -83,8 +86,7 @@ export function isCoordinatorLocal(): boolean {
 }
 
 export async function signInCoordinatorWithPin(pin: string): Promise<boolean> {
-  const expected = import.meta.env.VITE_COORDINATOR_PIN;
-  if (!expected || pin !== expected) return false;
+  if (pin !== COORDINATOR_PIN) return false;
   setCoordinatorLocal(true);
   const instance = auth();
   if (!instance) return true;
