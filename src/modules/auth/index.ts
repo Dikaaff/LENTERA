@@ -45,11 +45,57 @@ export async function signInCoordinator(): Promise<void> {
   const instance = auth();
   if (!instance) return;
   await signInWithPopup(instance, new GoogleAuthProvider());
+  setCoordinatorLocal(true);
 }
 
 export async function signOut() {
   const instance = auth();
   if (instance) await firebaseSignOut(instance);
+  clearCoordinatorLocal();
+}
+
+const COORDINATOR_MARKER = "lentera_coordinator_pin";
+
+export function setCoordinatorLocal(ok: boolean) {
+  if (typeof window === "undefined") return;
+  if (ok) {
+    try {
+      localStorage.setItem(COORDINATOR_MARKER, "1");
+    } catch {}
+  } else {
+    try {
+      localStorage.removeItem(COORDINATOR_MARKER);
+    } catch {}
+  }
+}
+
+export function clearCoordinatorLocal() {
+  setCoordinatorLocal(false);
+}
+
+export function isCoordinatorLocal(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(COORDINATOR_MARKER) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export async function signInCoordinatorWithPin(pin: string): Promise<boolean> {
+  const expected = import.meta.env.VITE_COORDINATOR_PIN;
+  if (!expected || pin !== expected) return false;
+  setCoordinatorLocal(true);
+  const instance = auth();
+  if (!instance) return true;
+  if (!instance.currentUser) {
+    try {
+      await signInAnonymously(instance);
+    } catch {
+      // ignore
+    }
+  }
+  return true;
 }
 
 export function useAuthUser() {
@@ -68,5 +114,7 @@ export function useAuthUser() {
     });
   }, []);
 
-  return { user, loading, role: roleOf(user) };
+  const localCoordinator = isCoordinatorLocal();
+  const role = !user ? "tamu" : localCoordinator || !user.isAnonymous ? "koordinator" : "relawan";
+  return { user, loading, role };
 }

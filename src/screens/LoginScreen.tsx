@@ -1,7 +1,14 @@
+import { useState } from "react";
 import { ShieldCheck, Users, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
-import { signInCoordinator, ensureVolunteer, useAuthUser } from "@/modules/auth";
+import { Input } from "@/components/ui/field";
+import {
+  signInCoordinator,
+  signInCoordinatorWithPin,
+  ensureVolunteer,
+  useAuthUser,
+} from "@/modules/auth";
 
 const PERAN = [
   {
@@ -29,6 +36,8 @@ const PERAN = [
 export function LoginScreen() {
   const { role, user } = useAuthUser();
   const isCoordinator = role === "koordinator";
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState("");
 
   if (isCoordinator) {
     return (
@@ -145,6 +154,42 @@ export function LoginScreen() {
         <p className="text-center text-xs text-muted">
           Relawan masuk otomatis tanpa akun. Koordinator butuh tautan Google.
         </p>
+
+        <div className="space-y-3 rounded-xl border border-line bg-base p-4">
+          <p className="text-sm font-semibold text-ink">Akses koordinator (kode akses)</p>
+          <p className="text-xs text-muted">
+            {import.meta.env.VITE_COORDINATOR_PIN
+              ? "Masukkan kode akses untuk panel koordinator."
+              : "Kode akses belum diatur. Mohon hubungi koordinator."}
+          </p>
+          <div className="flex gap-2">
+            <Input
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/D/g, "").slice(0, 8))}
+              placeholder="Kode akses"
+              maxLength={8}
+              className="flex-1 tabular-nums tracking-wider"
+            />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (!pin) return;
+                setPinError("");
+                void signInCoordinatorWithPin(pin).then((ok) => {
+                  if (!ok) {
+                    setPinError("Kode akses tidak dikenal.");
+                    return;
+                  }
+                  window.location.reload();
+                });
+              }}
+              disabled={!pin}
+            >
+              Masuk
+            </Button>
+          </div>
+          {pinError && <p className="text-xs text-emergency">{pinError}</p>}
+        </div>
       </div>
     </div>
   );
