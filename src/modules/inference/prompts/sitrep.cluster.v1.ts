@@ -1,3 +1,5 @@
+import type { Language } from "@/lib/language";
+
 export const META = {
   id: "sitrep.cluster.v1",
   version: "1.0.0",
@@ -64,8 +66,13 @@ Kembalikan JSON:
 {"clusters":[{"canonical_id":"","duplicate_ids":[],"confidence":0,"reason":""}], "unresolved_ids":[]}
 Gunakan hanya ID dari input. Satukan laporan yang menyebut kejadian sama. Jangan invent ID.`;
 
-export const buildUserPrompt = (reports: unknown) =>
-  USER_TEMPLATE.replace("{{REPORTS}}", JSON.stringify(reports));
+const REASON_LANGUAGE: Record<Language, string> = {
+  id: "Tulis setiap nilai reason dalam bahasa Indonesia.",
+  en: "Write every reason value in English.",
+};
+
+export const buildUserPrompt = (reports: unknown, language: Language = "id") =>
+  `${USER_TEMPLATE.replace("{{REPORTS}}", JSON.stringify(reports))}\n${REASON_LANGUAGE[language]}`;
 
 export const TEST_CASES = [
   {

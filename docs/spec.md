@@ -12,12 +12,12 @@ as free text.
 ## Who is harmed
 
 Relawan, kader posyandu, and kurir logistik working multi-day outages; the
-koordinator who must file a SITREP from fragments.
+admin who must file a SITREP from fragments.
 
 ## The one workflow that must be flawless
 
 1. Volunteer opens **Isi Laporan** in airplane mode.
-2. Writes an Indonesian note, optionally attaches one JPEG/PNG.
+2. Writes an Indonesian or English note, optionally attaches one JPEG/PNG.
 3. Taps **Proses laporan**. The app calls `initializeDeviceModel` from that
    gesture, then `runTask("report.extract.v1", ...)`.
 4. A card appears with every field editable. Invalid output is never rendered as
@@ -27,11 +27,11 @@ koordinator who must file a SITREP from fragments.
    count and the path used.
 7. Reload while offline: the report is still there.
 8. Reconnect: the report becomes `terkirim` with the same ID; no duplicate.
-9. Koordinator opens **SITREP**, grants cloud consent once, generates the daily
+9. Admin opens **SITREP**, grants cloud consent once, generates the daily
    narrative, and taps any claim to open its source report.
 
-If any step fails, the failure is visible in Indonesian; the report is never
-discarded.
+If any step fails, the failure is visible in the selected language; the report is
+never discarded.
 
 ## Non-goals
 
@@ -49,7 +49,7 @@ discarded.
 - [ ] Queue survives reload offline and syncs without duplicate IDs.
 - [ ] Conflict row shows a visible badge; last-write-wins limitation documented.
 - [ ] Emergency export downloads the full local queue as JSON.
-- [ ] SITREP ≤ 250 words, Indonesian, every claim carries a report ID.
+- [ ] SITREP ≤ 250 words in the selected language, every claim carries a report ID.
 - [ ] Rules tests deny cross-volunteer reads and synced-report edits.
 - [ ] Prompt suite includes 4 adversarial cases and a token budget assertion.
 - [ ] Build, typecheck, tests, boundaries pass from a clean clone.
@@ -69,10 +69,10 @@ discarded.
 ## Approved feature list
 
 Capture, extraction, offline queue, local map, cloud dedup + SITREP, consent
-gate, Relawan/Koordinator roles. Reject anything else.
+gate, Relawan/Admin roles. Reject anything else.
 
 ## Assumptions
 
 - Firebase project values arrive through env vars.
 - Province-level schematic geometry is acceptable for v1.
-- Coordinator identity uses Google sign-in; volunteer uses anonymous auth.
+- Admin identity uses Google sign-in only; volunteer uses anonymous auth.

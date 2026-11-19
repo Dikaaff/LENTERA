@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody } from "@/components/ui/card";
+import { useLanguage } from "@/lib/i18n";
 import { MAP_HEIGHT, MAP_WIDTH, countByRegion, regions, shadeFor } from "@/modules/map/geometry";
 import { useReports } from "@/modules/queue";
+import { statusLabel } from "@/modules/reports";
 
 export function MapScreen() {
+  const { language, t } = useLanguage();
   const reports = useReports();
   const counts = countByRegion(reports);
   const max = Math.max(0, ...Object.values(counts));
@@ -14,10 +17,8 @@ export function MapScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold tracking-tight">Peta</h1>
-        <p className="mt-1 text-sm text-muted">
-          Geometri provinsi dibundel di aplikasi. Tetap tampil tanpa jaringan.
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">{t("map.title")}</h1>
+        <p className="mt-1 text-sm text-muted">{t("map.subtitle")}</p>
       </header>
 
       <Card>
@@ -25,7 +26,7 @@ export function MapScreen() {
           <svg
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
             role="img"
-            aria-label="Peta kepadatan laporan per provinsi"
+            aria-label={t("map.aria")}
             className="h-auto w-full"
           >
             {regions.map((region) => (
@@ -38,14 +39,16 @@ export function MapScreen() {
                 className="cursor-pointer transition-[fill] duration-200"
                 onClick={() => setSelected(region.name)}
               >
-                <title>{`${region.name}: ${counts[region.name] ?? 0} laporan`}</title>
+                <title>
+                  {t("map.regionReports", {
+                    region: region.name,
+                    count: counts[region.name] ?? 0,
+                  })}
+                </title>
               </path>
             ))}
           </svg>
-          <p className="mt-2 text-[11px] uppercase tracking-wider text-muted">
-            Skema warna: permukaan kosong → amber padat. Batas provinsi disederhanakan, bukan
-            rujukan resmi.
-          </p>
+          <p className="mt-2 text-[11px] uppercase tracking-wider text-muted">{t("map.legend")}</p>
         </CardBody>
       </Card>
 
@@ -72,16 +75,19 @@ export function MapScreen() {
       {selected && (
         <section aria-live="polite" className="space-y-2">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-amber">
-            {selected} · {selectedReports.length} laporan
+            {t("map.regionReports", {
+              region: selected,
+              count: selectedReports.length,
+            })}
           </h2>
           {selectedReports.length === 0 && (
-            <p className="text-sm text-muted">Belum ada laporan di wilayah ini.</p>
+            <p className="text-sm text-muted">{t("map.emptyRegion")}</p>
           )}
           {selectedReports.map((report) => (
             <Card key={report.id}>
               <CardBody className="space-y-1">
                 <Badge tone={report.status === "synced" ? "synced" : "amber"}>
-                  {report.status}
+                  {statusLabel(report, language)}
                 </Badge>
                 <p className="text-sm">
                   {report.extraction.summary ?? report.rawNote.slice(0, 140)}

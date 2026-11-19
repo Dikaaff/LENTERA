@@ -3,10 +3,10 @@ import { canCreate, canDelete, canRead, canUpdate } from "../access";
 
 const volunteerA = { uid: "vol-a", role: "relawan" as const };
 const volunteerB = { uid: "vol-b", role: "relawan" as const };
-const coordinator = {
-  uid: "coord-1",
-  role: "koordinator" as const,
-  coordinatorRegion: "Jawa Barat",
+const admin = {
+  uid: "admin-1",
+  role: "admin" as const,
+  adminRegion: "Jawa Barat",
 };
 const report = {
   reporterId: "vol-a",
@@ -30,14 +30,14 @@ describe("rules mirror", () => {
     expect(canUpdate(volunteerA, report, ["status"])).toBe(true);
   });
 
-  it("lets a coordinator read their region and flag only", () => {
-    expect(canRead(coordinator, report)).toBe(true);
-    expect(canUpdate(coordinator, report, ["status"])).toBe(true);
-    expect(canUpdate(coordinator, report, ["status", "region"])).toBe(false);
+  it("lets an admin read their region and flag only", () => {
+    expect(canRead(admin, report)).toBe(true);
+    expect(canUpdate(admin, report, ["status"])).toBe(true);
+    expect(canUpdate(admin, report, ["status", "region"])).toBe(false);
   });
 
-  it("denies a coordinator from another region", () => {
-    expect(canRead({ ...coordinator, coordinatorRegion: "Aceh" }, report)).toBe(false);
+  it("denies an admin from another region", () => {
+    expect(canRead({ ...admin, adminRegion: "Aceh" }, report)).toBe(false);
   });
 
   it("never allows deletion", () => {

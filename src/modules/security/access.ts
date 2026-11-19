@@ -1,11 +1,11 @@
 import type { ReportStatus } from "@/modules/reports";
 
-export type Role = "relawan" | "koordinator" | "tamu";
+export type Role = "relawan" | "admin" | "tamu";
 
 export interface Actor {
   uid: string | null;
   role: Role;
-  coordinatorRegion?: string | null;
+  adminRegion?: string | null;
 }
 
 export interface ReportAccessShape {
@@ -19,7 +19,7 @@ export const isSignedIn = (actor: Actor) => actor.uid !== null;
 export const canRead = (actor: Actor, report: ReportAccessShape) =>
   isSignedIn(actor) &&
   (report.reporterId === actor.uid ||
-    (actor.role === "koordinator" && actor.coordinatorRegion === report.region));
+    (actor.role === "admin" && actor.adminRegion === report.region));
 
 export const canCreate = (actor: Actor, report: ReportAccessShape) =>
   isSignedIn(actor) &&
@@ -33,12 +33,12 @@ export const canUpdate = (
 ) => {
   if (!isSignedIn(actor)) return false;
   const ownerCanEdit = report.reporterId === actor.uid && report.status !== "synced";
-  const coordinatorCanFlag =
-    actor.role === "koordinator" &&
-    actor.coordinatorRegion === report.region &&
+  const adminCanFlag =
+    actor.role === "admin" &&
+    actor.adminRegion === report.region &&
     changedKeys.length === 1 &&
     changedKeys[0] === "status";
-  return ownerCanEdit || coordinatorCanFlag;
+  return ownerCanEdit || adminCanFlag;
 };
 
 /** Deletion is never granted to a client role. */

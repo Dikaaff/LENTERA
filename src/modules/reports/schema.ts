@@ -49,7 +49,14 @@ export const inferenceMetaSchema = z.strictObject({
   artifact: z.string(),
   version: z.string(),
   reason: z.string(),
-  inferenceSource: z.enum(["ON_DEVICE", "IN_CLOUD"]).optional(),
+  // Older records stored the SDK's lower-case value ("in_cloud"); normalise on read
+  // so a reload never drops an otherwise valid queued report.
+  inferenceSource: z
+    .preprocess(
+      (value) => (typeof value === "string" ? value.toUpperCase() : value),
+      z.enum(["ON_DEVICE", "IN_CLOUD"]),
+    )
+    .optional(),
   retried: z.boolean(),
 });
 

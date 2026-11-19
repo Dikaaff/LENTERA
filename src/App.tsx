@@ -11,15 +11,18 @@ import {
 
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, Route, Routes } from "react-router-dom";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { StatusBar } from "@/components/StatusBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
+import { useLanguage, type TranslationKey } from "@/lib/i18n";
 import {
   ensureVolunteer,
   signInAdmin,
   signOut as firebaseSignOut,
   useAuthUser,
+  type Role,
 } from "@/modules/auth";
 import { resumeSync } from "@/modules/queue";
 import { CaptureScreen } from "@/screens/CaptureScreen";
@@ -29,14 +32,20 @@ import { SitrepScreen } from "@/screens/SitrepScreen";
 import { AdminScreen } from "@/screens/AdminScreen";
 import { LoginScreen } from "@/screens/LoginScreen";
 
-const NAV = [
-  { to: "/", label: "Isi", icon: PenLine },
-  { to: "/antrean", label: "Antrean", icon: ClipboardList },
-  { to: "/peta", label: "Peta", icon: Map },
-  { to: "/sitrep", label: "SITREP", icon: FileText },
+const NAV: { to: string; key: TranslationKey; icon: typeof PenLine }[] = [
+  { to: "/", key: "nav.capture", icon: PenLine },
+  { to: "/antrean", key: "nav.queue", icon: ClipboardList },
+  { to: "/peta", key: "nav.map", icon: Map },
+  { to: "/sitrep", key: "nav.sitrep", icon: FileText },
 ];
 
-const ROLE_COLORS: Record<string, "neutral" | "amber" | "emergency"> = {
+const ROLE_KEY: Record<Role, TranslationKey> = {
+  relawan: "role.relawan",
+  admin: "role.admin",
+  tamu: "role.tamu",
+};
+
+const ROLE_COLORS: Record<Role, "neutral" | "amber" | "emergency"> = {
   relawan: "neutral",
   admin: "amber",
   tamu: "neutral",
@@ -61,7 +70,8 @@ export default function App() {
   );
 }
 
-function Shell({ role }: { role: string }) {
+function Shell({ role }: { role: Role }) {
+  const { t } = useLanguage();
   const { user, loading } = useAuthUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = role === "admin";
@@ -77,7 +87,7 @@ function Shell({ role }: { role: string }) {
           <div className="h-4 w-4 animate-ping rounded-full bg-amber opacity-70" />
           <div className="ml-4 h-4 w-4 rounded-full bg-amber" />
         </div>
-        <p className="mt-3 text-center text-xs text-muted">Memverifikasi identitas…</p>
+        <p className="mt-3 text-center text-xs text-muted">{t("app.loading")}</p>
       </div>
     );
   }
@@ -89,22 +99,22 @@ function Shell({ role }: { role: string }) {
           <img src="/logo.svg" alt="LENTERA" className="size-6 shrink-0" />
           <div className="min-w-0">
             <p className="text-sm font-bold tracking-tight">LENTERA</p>
-            <p className="truncate text-[11px] text-muted">Laporan lapangan</p>
+            <p className="truncate text-[11px] text-muted">{t("app.subtitle")}</p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          {" "}
+          <LanguageToggle />
           <Badge
             tone={ROLE_COLORS[role] === "emergency" ? "danger" : (ROLE_COLORS[role] ?? "neutral")}
             className="mr-1"
           >
-            {role === "admin" && <ShieldCheck className="mr-1 size-3" />}
-            {role}
+            {isAdmin && <ShieldCheck className="mr-1 size-3" />}
+            {t(ROLE_KEY[role])}
           </Badge>
           <button
             type="button"
             className="flex size-9 cursor-pointer items-center justify-center rounded-xl text-muted transition hover:bg-surface hover:text-ink"
-            aria-label="Menu"
+            aria-label={t("app.menu")}
             onClick={() => setMenuOpen((v) => !v)}
           >
             {menuOpen ? <LogOut className="size-5" /> : <UserIcon className="size-5" />}
@@ -115,43 +125,39 @@ function Shell({ role }: { role: string }) {
       {menuOpen && (
         <Card className="border-amber/30 mx-4 mt-3 mb-0 rounded-2xl">
           <CardBody className="flex flex-col gap-2">
-            {role !== "tamu" && (
-              <>
-                <div className="flex items-center gap-3 px-3 py-2">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-base" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-ink">
-                      {user?.isAnonymous ? "Relawan lapangan" : "Admin"}
-                    </p>
-                    <p className="text-[11px] font-mono text-muted">
-                      {role === "admin"
-                        ? (user?.displayName ?? "Admin")
-                        : `ID: ${user?.uid?.slice(0, 12)}…`}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => firebaseSignOut()}
-                >
-                  <LogOut className="size-4" /> Keluar
-                </Button>
-                {role === "relawan" && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      void signInAdmin();
-                    }}
-                  >
-                    <Users className="size-4" /> Naikkan ke admin
-                  </Button>
-                )}
-              </>
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="flex size-10 items-center justify-center rounded-full bg-base" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-ink">
+                  {user?.isAnonymous ? t("menu.volunteer") : t("menu.admin")}
+                </p>
+                <p className="text-[11px] font-mono text-muted">
+                  {isAdmin
+                    ? (user?.displayName ?? t("menu.admin"))
+                    : `ID: ${user?.uid?.slice(0, 12)}…`}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => firebaseSignOut()}
+            >
+              <LogOut className="size-4" /> {t("menu.signOut")}
+            </Button>
+            {role === "relawan" && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => {
+                  setMenuOpen(false);
+                  void signInAdmin();
+                }}
+              >
+                <Users className="size-4" /> {t("menu.promote")}
+              </Button>
             )}
             {isAdmin && (
               <NavLink
@@ -161,8 +167,8 @@ function Shell({ role }: { role: string }) {
               >
                 <Users className="size-5 shrink-0 text-amber" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-ink">Panel admin</p>
-                  <p className="text-[11px] text-muted">Lihat laporan dan data wilayah</p>
+                  <p className="text-sm font-medium text-ink">{t("menu.panel")}</p>
+                  <p className="text-[11px] text-muted">{t("menu.panelHint")}</p>
                 </div>
               </NavLink>
             )}
@@ -176,8 +182,8 @@ function Shell({ role }: { role: string }) {
 
       <StatusBar />
 
-      <nav aria-label="Navigasi utama" className="grid grid-cols-4 border-t border-line bg-base">
-        {NAV.map(({ to, label, icon: Icon }) => (
+      <nav aria-label={t("app.menu")} className="grid grid-cols-4 border-t border-line bg-base">
+        {NAV.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -189,7 +195,7 @@ function Shell({ role }: { role: string }) {
             }
           >
             <Icon className="size-5" aria-hidden />
-            {label}
+            {t(key)}
           </NavLink>
         ))}
       </nav>

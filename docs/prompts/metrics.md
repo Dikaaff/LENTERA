@@ -56,7 +56,7 @@ air"` was accepted as a report (`is_report: true`) although the fixture expects
 
 ## Automated checks that did run
 
-- 44 unit tests pass, including:
+- 53 unit tests pass, including:
   - injection defense string present verbatim;
   - all four adversarial notes stay under the 2,600-token budget;
   - schema rejects unknown keys and enum values;

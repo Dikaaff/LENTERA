@@ -24,7 +24,7 @@
   extraction was measured after the project was attached: 36/36 calls, 87.5%
   field accuracy. Dedup and SITREP narrative remain unmeasured.
 - Nothing from the data layer was cut: the emulator suite covers rules and sync.
-- Regency-level geometry. Province-level keeps the bundle at 336 KB and the map
+- Regency-level geometry. Province-level keeps the bundle at ~198 KB and the map
   useful offline.
 - Coordinator onboarding UI. Google sign-in exists; seeding
   `coordinators/{uid}.region` is an operator step.

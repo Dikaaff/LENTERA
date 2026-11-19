@@ -1,7 +1,7 @@
 # LENTERA — Progress Ledger
 
 Live task log. Updated after each completed task.
-Last update: 2026-11-13, session 3.
+Last update: 2026-11-19, session 5.
 
 ## Legend
 
@@ -19,7 +19,7 @@ Last update: 2026-11-13, session 3.
 | F2    | Spec and tickets                   | [x] spec + 12 tickets                             |
 | F3    | Constitution, scaffold, guardrails | [x] AGENTS, depcruise, husky, setup wizard        |
 | F4    | Brand, logo, design system         | [x] brand.md, design.md, 3 SVG assets             |
-| F5    | Inference core                     | [~] 44 tests + 36/36 cloud calls; Nano unmeasured |
+| F5    | Inference core                     | [~] 53 tests + cloud calls; Nano unmeasured       |
 | F6    | Data layer and offline queue       | [x] emulator + live sync verified                 |
 | F7    | Prompt artifacts                   | [~] 3 artifacts; cloud measured, Nano unmeasured  |
 | F8    | UI                                 | [x] 4 screens + status bar + consent              |
@@ -51,9 +51,9 @@ Last update: 2026-11-13, session 3.
 | T17 | Firestore sync + conflict flag                                 | [x]    | emulator E2E: `terkirim` + reload; conflict unit-tested |
 | T18 | Consent gate + SITREP helpers                                  | [x]    | `src/modules/sitrep/**`                                 |
 | T19 | Four screens + status bar                                      | [x]    | `src/screens/**`, `src/App.tsx`                         |
-| T20 | Offline SVG province map                                       | [x]    | `src/modules/map/*` (336 KB GeoJSON)                    |
+| T20 | Offline SVG province map                                       | [x]    | `src/modules/map/*` (198 KB ODbL GeoJSON)               |
 | T21 | Firestore rules + access mirror                                | [x]    | `firestore.rules`, 11 emulator tests                    |
-| T22 | Unit tests                                                     | [x]    | 44 tests, 7 files, all pass                             |
+| T22 | Unit tests                                                     | [x]    | 53 tests, 7 files, all pass                             |
 | T23 | Typecheck / boundaries / build                                 | [x]    | all exit 0                                              |
 | T24 | README, Apache-2.0, video script                               | [x]    | `README.md`, `LICENSE`, `docs/video-script.md`          |
 | T25 | QA, security evidence, metrics, assumptions                    | [x]    | `docs/qa.md`, `docs/security/`, `docs/prompts/`         |
@@ -74,7 +74,7 @@ Last update: 2026-11-13, session 3.
 ## Verification snapshot
 
 ```
-npm run check       -> 44 unit tests pass; typecheck + boundaries clean
+npm run check       -> 53 unit tests pass; typecheck + boundaries clean
 npm run test:rules  -> 11/11 Firestore emulator tests pass
 npm run build       -> pass; PWA precache 9 entries; no demo config in bundle
 emulator E2E        -> capture → sync terkirim → reload → map: PASS
@@ -105,8 +105,9 @@ push. Future pushes use the same remote and fail loudly if credentials expire.
 ## Blockers
 
 1. **No Nano-capable Chrome.** On-device path unmeasured.
-2. **No App Check enforcement.** AI Logic answered without it; the production
-   reCAPTCHA key is still unset.
+2. **App Check enforcement unverified.** The client now initializes reCAPTCHA
+   Enterprise from the site key, but Firebase CLI credentials are invalid, so the
+   console enforcement state could not be read or changed.
 3. **Coordinator docs are not seeded.** Needs a signed-in Google uid.
 4. **SITREP artifacts unmeasured.** Only `report.extract.v1` has live cloud
    numbers.
@@ -159,3 +160,22 @@ failure. Detail: `docs/prompts/cloud-metrics.json`.
 LENS: nano gpu 128 MB / Chrome 157 LanguageModel.unavailable; reCAPTCHA site key 6Lfe0h0uAAAAAFhriIc48g4get5hmL-DsK9E7anq ke web app; Firestore UNENFORCED; confirm site key env + revisit enforcement; fix prompt/schema (100k/confidence-low); SITREP harness 6 cloud calls.
 
 WORKSPACE_LOG: stage4 began.
+
+## Session 5 progress (contest compliance)
+
+- [x] Bilingual UI: Indonesian default, English toggle in the header and login
+      screen; localStorage persistence; `document.lang`, title, and meta
+      description follow the choice.
+- [x] Model output follows the UI language: English few-shots for extraction,
+      explicit language instructions for cluster reasons and SITREP claims, and
+      localized inference rejection reasons.
+- [x] Hardcoded admin PIN and local admin marker removed; admin is Google-only.
+- [x] Province GeoJSON replaced with geoBoundaries IDN ADM1 (ODbL-1.0, OSM
+      derived), simplified to ~198 KB; `THIRD_PARTY_NOTICES.md` added.
+- [x] `docs/demo/` ignored and the two Chrome profiles with cookies/history
+      deleted; demo media kept locally.
+- [x] `npm run check`: 53 unit tests pass, typecheck and boundaries clean;
+      `npm run build` passes.
+- [ ] Deploy the new bundle (blocked: Firebase CLI credentials invalid).
+- [ ] Set App Check to Enforced (blocked: same credentials).
+- [ ] Record the video and submit on Devpost (manual).

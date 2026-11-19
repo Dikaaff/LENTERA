@@ -1,17 +1,19 @@
+import { useLanguage, type TranslationKey } from "@/lib/i18n";
 import { useLastRun } from "@/modules/inference";
 import { queueMode, useHeldCount } from "@/modules/queue";
 import type { InferencePath } from "@/modules/reports";
 import { NumberTicker } from "./motion";
 
-const PATH_LABEL: Record<InferencePath | "idle", string> = {
-  idle: "siap",
-  on_device: "perangkat",
-  cloud: "cloud",
-  fallback: "cloud (cadangan)",
-  unavailable: "belum aktif",
+const PATH_KEY: Record<InferencePath | "idle", TranslationKey> = {
+  idle: "statusbar.path.idle",
+  on_device: "statusbar.path.on_device",
+  cloud: "statusbar.path.cloud",
+  fallback: "statusbar.path.fallback",
+  unavailable: "statusbar.path.unavailable",
 };
 
 export function StatusBar() {
+  const { t } = useLanguage();
   const last = useLastRun();
   const held = useHeldCount();
   const path = last?.path ?? "idle";
@@ -23,14 +25,15 @@ export function StatusBar() {
           aria-hidden
           className={`size-2 ${path === "on_device" ? "bg-synced" : path === "unavailable" ? "bg-emergency" : "bg-amber"}`}
         />
-        Proses: <strong className="font-semibold text-ink">{PATH_LABEL[path]}</strong>
+        {t("statusbar.process")}{" "}
+        <strong className="font-semibold text-ink">{t(PATH_KEY[path])}</strong>
       </span>
       <span className="flex items-center gap-3 text-muted">
         <span className="uppercase tracking-wider">
-          {queueMode === "cloud" ? "firestore" : "lokal saja"}
+          {queueMode === "cloud" ? t("statusbar.mode.cloud") : t("statusbar.mode.local")}
         </span>
         <span>
-          Antrean: <NumberTicker value={held} className="font-semibold text-ink" />
+          {t("statusbar.queue")} <NumberTicker value={held} className="font-semibold text-ink" />
         </span>
       </span>
     </div>

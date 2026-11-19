@@ -37,7 +37,8 @@ survive when the network does not."
 
 - No placeholders, `TODO`, `any`, or dead code.
 - Functions ≤ 40 lines, files ≤ 200 lines, one reason to change per module.
-- All human-facing copy in Indonesian. JSON keys and enum values in English.
+- Human-facing copy ships in Indonesian (default) and English (toggle). No third
+  locale without a one-line justification. JSON keys and enum values in English.
 - Numerals use tabular figures. Touch targets ≥ 44 px. Dark surface by default.
 - Comments explain why, in one line. Do not comment what the code says.
 - All colors come from tokens in `src/index.css` / `docs/brand.md`.

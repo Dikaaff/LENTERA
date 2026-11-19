@@ -1,26 +1,33 @@
 import { Plus, Trash2 } from "lucide-react";
+import { useLanguage, type TranslationKey } from "@/lib/i18n";
 import type { Category, Extraction, Urgency } from "@/modules/reports";
 import { Button } from "./ui/button";
 import { Card, CardBody, CardHeader } from "./ui/card";
 import { Input, Label, Select, Textarea } from "./ui/field";
 
-const CATEGORY_LABEL: Record<Category, string> = {
-  evacuation: "evakuasi",
-  medical: "medis",
-  food_water: "pangan & air",
-  shelter: "tempat tinggal",
-  infrastructure: "infrastruktur",
-  logistics: "logistik",
-  missing_person: "orang hilang",
-  other: "lainnya",
+const CATEGORY_KEY: Record<Category, TranslationKey> = {
+  evacuation: "category.evacuation",
+  medical: "category.medical",
+  food_water: "category.food_water",
+  shelter: "category.shelter",
+  infrastructure: "category.infrastructure",
+  logistics: "category.logistics",
+  missing_person: "category.missing_person",
+  other: "category.other",
 };
 
-const URGENCY_LABEL: Record<Urgency, string> = {
-  critical: "kritis",
-  high: "tinggi",
-  medium: "sedang",
-  low: "rendah",
+const URGENCY_KEY: Record<Urgency, TranslationKey> = {
+  critical: "urgency.critical",
+  high: "urgency.high",
+  medium: "urgency.medium",
+  low: "urgency.low",
 };
+
+const CONFIDENCE_KEY = {
+  high: "confidence.high",
+  medium: "confidence.medium",
+  low: "confidence.low",
+} as const;
 
 interface Props {
   value: Extraction;
@@ -28,6 +35,7 @@ interface Props {
 }
 
 export function ExtractionCard({ value, onChange }: Props) {
+  const { t } = useLanguage();
   const location = value.location ?? { name: null, regency: null, confidence: "low" as const };
   const people = value.people_affected ?? { min: null, max: null };
 
@@ -37,22 +45,22 @@ export function ExtractionCard({ value, onChange }: Props) {
     <Card className="border-amber/40">
       <CardHeader>
         <h2 className="text-sm font-semibold uppercase tracking-wider text-amber">
-          Hasil ekstraksi — periksa dulu
+          {t("extraction.title")}
         </h2>
       </CardHeader>
       <CardBody className="space-y-4">
         <label className="block">
-          <Label>Ringkasan</Label>
+          <Label>{t("extraction.summary")}</Label>
           <Textarea
             value={value.summary ?? ""}
             onChange={(event) => patch({ summary: event.target.value || null })}
-            placeholder="Ringkasan laporan dalam bahasa Indonesia"
+            placeholder={t("extraction.summaryPlaceholder")}
           />
         </label>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <Label>Kategori</Label>
+            <Label>{t("extraction.category")}</Label>
             <Select
               value={value.category ?? ""}
               onChange={(event) =>
@@ -60,15 +68,15 @@ export function ExtractionCard({ value, onChange }: Props) {
               }
             >
               <option value="">—</option>
-              {Object.entries(CATEGORY_LABEL).map(([key, label]) => (
+              {Object.entries(CATEGORY_KEY).map(([key, labelKey]) => (
                 <option key={key} value={key}>
-                  {label}
+                  {t(labelKey)}
                 </option>
               ))}
             </Select>
           </label>
           <label className="block">
-            <Label>Urgensi</Label>
+            <Label>{t("extraction.urgency")}</Label>
             <Select
               value={value.urgency ?? ""}
               onChange={(event) =>
@@ -76,9 +84,9 @@ export function ExtractionCard({ value, onChange }: Props) {
               }
             >
               <option value="">—</option>
-              {Object.entries(URGENCY_LABEL).map(([key, label]) => (
+              {Object.entries(URGENCY_KEY).map(([key, labelKey]) => (
                 <option key={key} value={key}>
-                  {label}
+                  {t(labelKey)}
                 </option>
               ))}
             </Select>
@@ -87,7 +95,7 @@ export function ExtractionCard({ value, onChange }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <Label>Lokasi</Label>
+            <Label>{t("extraction.location")}</Label>
             <Input
               value={location.name ?? ""}
               onChange={(event) =>
@@ -98,7 +106,7 @@ export function ExtractionCard({ value, onChange }: Props) {
             />
           </label>
           <label className="block">
-            <Label>Kabupaten / kota</Label>
+            <Label>{t("extraction.regency")}</Label>
             <Input
               value={location.regency ?? ""}
               onChange={(event) =>
@@ -112,7 +120,7 @@ export function ExtractionCard({ value, onChange }: Props) {
 
         <div className="grid grid-cols-3 gap-3">
           <label className="block">
-            <Label>Jiwa (min)</Label>
+            <Label>{t("extraction.peopleMin")}</Label>
             <Input
               type="number"
               min={0}
@@ -128,7 +136,7 @@ export function ExtractionCard({ value, onChange }: Props) {
             />
           </label>
           <label className="block">
-            <Label>Jiwa (maks)</Label>
+            <Label>{t("extraction.peopleMax")}</Label>
             <Input
               type="number"
               min={0}
@@ -144,7 +152,7 @@ export function ExtractionCard({ value, onChange }: Props) {
             />
           </label>
           <label className="block">
-            <Label>Keyakinan lokasi</Label>
+            <Label>{t("extraction.confidence")}</Label>
             <Select
               value={location.confidence}
               onChange={(event) =>
@@ -156,19 +164,21 @@ export function ExtractionCard({ value, onChange }: Props) {
                 })
               }
             >
-              <option value="high">tinggi</option>
-              <option value="medium">sedang</option>
-              <option value="low">rendah</option>
+              {Object.entries(CONFIDENCE_KEY).map(([key, labelKey]) => (
+                <option key={key} value={key}>
+                  {t(labelKey)}
+                </option>
+              ))}
             </Select>
           </label>
         </div>
 
         <fieldset className="space-y-2">
-          <Label>Kebutuhan</Label>
+          <Label>{t("extraction.needs")}</Label>
           {value.needs.map((need, index) => (
             <div key={index} className="grid grid-cols-[1fr_80px_80px_44px] gap-2">
               <Input
-                aria-label={`Nama kebutuhan ${index + 1}`}
+                aria-label={t("extraction.needName", { index: index + 1 })}
                 value={need.item}
                 onChange={(event) => {
                   const needs = [...value.needs];
@@ -177,7 +187,7 @@ export function ExtractionCard({ value, onChange }: Props) {
                 }}
               />
               <Input
-                aria-label={`Jumlah kebutuhan ${index + 1}`}
+                aria-label={t("extraction.needQuantity", { index: index + 1 })}
                 type="number"
                 min={0}
                 value={need.quantity ?? ""}
@@ -191,7 +201,7 @@ export function ExtractionCard({ value, onChange }: Props) {
                 }}
               />
               <Input
-                aria-label={`Satuan kebutuhan ${index + 1}`}
+                aria-label={t("extraction.needUnit", { index: index + 1 })}
                 value={need.unit ?? ""}
                 onChange={(event) => {
                   const needs = [...value.needs];
@@ -203,7 +213,7 @@ export function ExtractionCard({ value, onChange }: Props) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Hapus kebutuhan"
+                aria-label={t("extraction.removeNeed")}
                 onClick={() => patch({ needs: value.needs.filter((_, i) => i !== index) })}
               >
                 <Trash2 className="size-4" />
@@ -218,13 +228,13 @@ export function ExtractionCard({ value, onChange }: Props) {
               patch({ needs: [...value.needs, { item: "", quantity: null, unit: null }] })
             }
           >
-            <Plus className="size-4" /> Tambah kebutuhan
+            <Plus className="size-4" /> {t("extraction.addNeed")}
           </Button>
         </fieldset>
 
         {value.note_anomaly && (
           <p className="border border-emergency/50 p-3 text-xs text-emergency">
-            Catatan mencurigakan (disimpan apa adanya, tidak dijalankan): {value.note_anomaly}
+            {t("extraction.anomaly", { note: value.note_anomaly })}
           </p>
         )}
       </CardBody>

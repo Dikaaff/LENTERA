@@ -3,10 +3,13 @@
 **Field reports that survive when the network does not.**
 
 LENTERA is a mobile-first PWA for disaster relief volunteers, posyandu health
-workers, and field logistics couriers in Indonesia. A free-form Indonesian note
-and an optional photo become a validated structured report entirely on the
-device, enter a local-first Firestore queue, sync when signal returns, and roll
-up into a daily situation report for coordinators.
+workers, and field logistics couriers in Indonesia. A free-form Indonesian or
+English note and an optional photo become a validated structured report entirely
+on the device, enter a local-first Firestore queue, sync when signal returns, and
+roll up into a daily situation report for coordinators.
+
+The interface ships in Indonesian by default with an English toggle, so judges and
+international coordinators can use the same build without a separate translation.
 
 Built for the **#BuildHybridAI** challenge using **Firebase AI Logic hybrid
 inference**: Gemini Nano on-device when possible, Gemini in the cloud when not.
@@ -16,6 +19,24 @@ Auth are active. A live headless run signed in as `RELAWAN`, saved a report, saw
 `TERKIRIM`, and kept it after reload: `docs/evidence/live-terkirim.png`.
 
 ![LENTERA mark](public/logo-lockup.svg)
+
+## Judge quickstart (5 minutes)
+
+1. Open <https://lentera-6f2a-db3a1.web.app> and choose **Relawan lapangan**
+   (volunteer). No account is required.
+2. Paste one of the sample notes from `docs/demo/script.json`, for example:
+   `Ada 30 keluarga di balai desa Sukamaju, butuh air bersih dan selimut. Jalan longsor.`
+3. Press **Proses laporan**. The extraction card shows category, urgency, location,
+   people affected, and needs. Edit anything before saving.
+4. Press **Simpan ke antrean**. Open **Antrean** and confirm the row is visible
+   with its inference path (`perangkat`, `cloud`, or `manual`).
+5. Switch the header toggle from **ID** to **EN**; navigation, statuses, and the
+   next model output follow the selected language.
+6. Open **SITREP**, accept the cloud consent panel, and run **Deduplikasi** or
+   **Susun SITREP** to see claims with source-report links.
+
+App Check, deployment, and the recorded video are manual steps. The exact
+submission checklist is in `docs/submission/devpost.md`.
 
 ## Why hybrid, specifically
 
@@ -35,8 +56,10 @@ and the SDK reports the path it actually used (`response.inferenceSource`).
   `konflik`, a held-count ticker, and an emergency JSON export.
 - **Peta** — bundled Indonesian province GeoJSON rendered as SVG; works in
   airplane mode; shading by report density.
-- **SITREP** — consent-gated deduplication and a ≤250-word Indonesian narrative,
-  every claim linked to its source report.
+- **SITREP** — consent-gated deduplication and a ≤250-word narrative in the
+  selected language, every claim linked to its source report.
+- **Bahasa / Language** — Indonesian default, English toggle; the choice also
+  sets the model's output language for extraction, cluster reasons, and SITREP.
 - **Roles** — anonymous volunteer, Google-signed-in coordinator.
 - **Privacy** — reporter names/phones masked before any model call; raw notes and
   photos never leave the device.
@@ -90,7 +113,7 @@ editing, queue, export, and map work; AI and sync say they are unavailable
 instead of pretending. That is intentional.
 
 ```bash
-npm run check   # typecheck + 44 unit tests + boundaries
+npm run check   # typecheck + 53 unit tests + boundaries
 npm run build   # production PWA build
 ```
 
@@ -158,11 +181,11 @@ fallback so the app never looks broken on those devices.
 
 ## Prompt artifacts
 
-| Artifact            | Path            | Temperature | Output                      |
-| ------------------- | --------------- | ----------- | --------------------------- |
-| `report.extract.v1` | on-device first | 0 (cloud)   | structured extraction       |
-| `sitrep.cluster.v1` | cloud           | 0           | canonical IDs + confidence  |
-| `sitrep.daily.v1`   | cloud           | 0.3         | 4-section Indonesian SITREP |
+| Artifact            | Path            | Temperature | Output                              |
+| ------------------- | --------------- | ----------- | ----------------------------------- |
+| `report.extract.v1` | on-device first | 0 (cloud)   | structured extraction               |
+| `sitrep.cluster.v1` | cloud           | 0           | canonical IDs + confidence          |
+| `sitrep.daily.v1`   | cloud           | 0.3         | 4-section SITREP in the UI language |
 
 Every artifact lives in `src/modules/inference/prompts/`, is versioned, carries
 a 12-case table, and is tested. The extraction system prompt contains a verbatim
@@ -174,7 +197,7 @@ routing ceiling. See `docs/prompts/metrics.md`.
 
 **Measured in this repo:**
 
-- 44 unit tests pass; typecheck, dependency boundaries, and production build pass.
+- 53 unit tests pass; typecheck, dependency boundaries, and production build pass.
 - 11 Firestore emulator rules tests pass, including cross-volunteer denial and
   synced-report edit denial.
 - Headless Chrome walkthrough passes: capture → consent → manual fallback →
@@ -218,9 +241,9 @@ than claimed.
 
 Other known limitations:
 
-- Chrome's Prompt API does not officially support Indonesian. Prompts are
-  English; output values are instructed to be Indonesian; cloud fallback exists.
-  This is a mitigation, not a guarantee.
+- Chrome's Prompt API does not officially support Indonesian. System prompts stay
+  in English; every user-facing model output is instructed to follow the selected
+  UI language; cloud fallback exists. This is a mitigation, not a guarantee.
 - Map geometry is province-level and schematic, not authoritative regency
   boundaries.
 - Conflict handling is last-write-wins prevention (flag a newer remote copy), not
@@ -256,6 +279,15 @@ docs/state/             checkpoint + skill audit
 progress.md             live task ledger
 ```
 
+## Data attribution
+
+The bundled province geometry in `src/modules/map/indonesia.geojson` is derived
+from geoBoundaries IDN ADM1 (ODbL-1.0), which is in turn derived from
+OpenStreetMap. The file is simplified in-repo and remains ODbL-1.0; the
+application source remains Apache-2.0. Attribution and change notes are in
+[`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
+
 ## License
 
-Apache-2.0. See [LICENSE](./LICENSE).
+Apache-2.0. See [LICENSE](./LICENSE). Bundled data keeps its own license as noted
+above.

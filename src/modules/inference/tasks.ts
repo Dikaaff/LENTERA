@@ -1,3 +1,4 @@
+import type { Language } from "@/lib/language";
 import {
   clusterSchema,
   extractionJsonSchema,
@@ -24,14 +25,14 @@ export interface TaskOutputs {
 
 interface TaskDef {
   mode: Mode;
-  reason: string;
+  reason: Record<Language, string>;
   temperature: number;
   schema: {
     parse: (value: unknown) => unknown;
     safeParse: (value: unknown) => { success: boolean };
   };
   jsonSchema: { [key: string]: unknown };
-  build: (input: unknown) => string;
+  build: (input: unknown, language: Language) => string;
 }
 
 const clusterJsonSchema = {
@@ -86,29 +87,40 @@ const sitrepJsonSchema = {
 export const TASKS: Record<TaskName, TaskDef> = {
   "report.extract.v1": {
     mode: "PREFER_ON_DEVICE",
-    reason: "Ekstraksi rutin dan privat harus tetap jalan tanpa jaringan.",
+    reason: {
+      id: "Ekstraksi rutin dan privat harus tetap jalan tanpa jaringan.",
+      en: "Routine, private extraction must keep working without a network.",
+    },
     temperature: 0,
     schema: extractionSchema,
     jsonSchema: extractionJsonSchema,
-    build: (input) => extract.buildUserPrompt((input as TaskInputs["report.extract.v1"]).note),
+    build: (input, language) =>
+      extract.buildUserPrompt((input as TaskInputs["report.extract.v1"]).note, language),
   },
   "sitrep.cluster.v1": {
     mode: "PREFER_IN_CLOUD",
-    reason: "Deduplikasi butuh konteks lintas laporan.",
+    reason: {
+      id: "Deduplikasi butuh konteks lintas laporan.",
+      en: "Deduplication needs context across reports.",
+    },
     temperature: 0,
     schema: clusterSchema,
     jsonSchema: clusterJsonSchema,
-    build: (input) => cluster.buildUserPrompt((input as TaskInputs["sitrep.cluster.v1"]).reports),
+    build: (input, language) =>
+      cluster.buildUserPrompt((input as TaskInputs["sitrep.cluster.v1"]).reports, language),
   },
   "sitrep.daily.v1": {
     mode: "ONLY_IN_CLOUD",
-    reason: "Narasi panjang dengan banyak sumber tidak muat di perangkat.",
+    reason: {
+      id: "Narasi panjang dengan banyak sumber tidak muat di perangkat.",
+      en: "A long narrative with many sources does not fit on the device.",
+    },
     temperature: 0.3,
     schema: sitrepSchema,
     jsonSchema: sitrepJsonSchema,
-    build: (input) => {
+    build: (input, language) => {
       const value = input as TaskInputs["sitrep.daily.v1"];
-      return daily.buildUserPrompt(value.reports, value.aggregates);
+      return daily.buildUserPrompt(value.reports, value.aggregates, language);
     },
   },
 };

@@ -96,6 +96,14 @@ describe("reportRecordSchema", () => {
   it("rejects an unknown status", () => {
     expect(reportRecordSchema.safeParse({ ...record, status: "sent" }).success).toBe(false);
   });
+
+  it("normalises the SDK's lower-case inferenceSource instead of dropping the report", () => {
+    const parsed = reportRecordSchema.parse({
+      ...record,
+      inference: { ...record.inference, inferenceSource: "in_cloud" },
+    });
+    expect(parsed.inference.inferenceSource).toBe("IN_CLOUD");
+  });
 });
 
 describe("status helpers", () => {

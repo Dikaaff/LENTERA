@@ -1,14 +1,20 @@
+import type { Language } from "@/lib/language";
 import type { ReportRecord, ReportStatus } from "./types";
 
-export const STATUS_LABEL: Record<ReportStatus, string> = {
-  draft: "draf",
-  queued: "menunggu",
-  synced: "terkirim",
-  conflict: "konflik",
+const STATUS_LABEL: Record<Language, Record<ReportStatus, string>> = {
+  id: { draft: "draf", queued: "menunggu", synced: "terkirim", conflict: "konflik" },
+  en: { draft: "draft", queued: "queued", synced: "sent", conflict: "conflict" },
 };
 
-export const statusLabel = (report: Pick<ReportRecord, "status" | "needsReview">) =>
-  report.needsReview && report.status !== "synced" ? "perlu ditinjau" : STATUS_LABEL[report.status];
+export const statusLabel = (
+  report: Pick<ReportRecord, "status" | "needsReview">,
+  language: Language = "id",
+) =>
+  report.needsReview && report.status !== "synced"
+    ? language === "id"
+      ? "perlu ditinjau"
+      : "needs review"
+    : STATUS_LABEL[language][report.status];
 
 export const heldCount = (reports: Pick<ReportRecord, "status">[]) =>
   reports.filter((r) => r.status === "queued" || r.status === "draft" || r.status === "conflict")

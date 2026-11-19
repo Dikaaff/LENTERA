@@ -45,59 +45,11 @@ export async function signInAdmin(): Promise<void> {
   const instance = auth();
   if (!instance) return;
   await signInWithPopup(instance, new GoogleAuthProvider());
-  setAdminLocal(true);
 }
 
 export async function signOut() {
   const instance = auth();
   if (instance) await firebaseSignOut(instance);
-  clearAdminLocal();
-}
-
-const ADMIN_PIN = "12345678";
-const ADMIN_MARKER = "lentera_admin_pin";
-
-export { ADMIN_PIN };
-
-export function setAdminLocal(ok: boolean) {
-  if (typeof window === "undefined") return;
-  if (ok) {
-    try {
-      localStorage.setItem(ADMIN_MARKER, "1");
-    } catch {}
-  } else {
-    try {
-      localStorage.removeItem(ADMIN_MARKER);
-    } catch {}
-  }
-}
-
-export function clearAdminLocal() {
-  setAdminLocal(false);
-}
-
-export function isAdminLocal(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(ADMIN_MARKER) === "1";
-  } catch {
-    return false;
-  }
-}
-
-export async function signInAdminWithPin(pin: string): Promise<boolean> {
-  if (pin !== ADMIN_PIN) return false;
-  setAdminLocal(true);
-  const instance = auth();
-  if (!instance) return true;
-  if (!instance.currentUser) {
-    try {
-      await signInAnonymously(instance);
-    } catch {
-      // ignore
-    }
-  }
-  return true;
 }
 
 export function useAuthUser() {
@@ -116,7 +68,6 @@ export function useAuthUser() {
     });
   }, []);
 
-  const localAdmin = isAdminLocal();
-  const role = !user ? "tamu" : localAdmin || !user.isAnonymous ? "admin" : "relawan";
-  return { user, loading, role };
+  const role = !user ? "tamu" : user.isAnonymous ? "relawan" : "admin";
+  return { user, loading, role } satisfies { user: User | null; loading: boolean; role: Role };
 }

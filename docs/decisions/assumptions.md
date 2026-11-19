@@ -47,9 +47,10 @@ Consequences:
 2. **Magic UI patterns implemented locally.** `NumberTicker` uses
    `requestAnimationFrame`; `BlurFade` uses one CSS keyframe. No animation
    dependency was added.
-3. **Province geometry, not regency geometry.** A 336 KB province GeoJSON
-   (`superpikar/indonesia-geojson`, accessed 2026-11-13) is bundled. Regency
-   geometry would be tens of megabytes. ADR-003 records the tradeoff.
+3. **Province geometry, not regency geometry.** A ~198 KB province GeoJSON
+   (geoBoundaries IDN ADM1, ODbL-1.0, simplified in-repo; see
+   `THIRD_PARTY_NOTICES.md`, accessed 2026-11-19) is bundled. Regency geometry
+   would be tens of megabytes. ADR-003 records the tradeoff.
 4. **On-device temperature is not configurable.** Firebase JS SDK v13 only
    exposes `temperature` in `inCloudParams.generationConfig`. The prompt carries
    determinism instructions instead.

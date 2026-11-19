@@ -108,4 +108,23 @@ describe("runTask", () => {
     expect(result.meta.path).toBe("unavailable");
     expect(result.error).toContain("Firebase belum dikonfigurasi");
   });
+
+  it("localises inference reasons when English is selected", async () => {
+    vi.mocked(getFirebaseApp).mockReturnValueOnce(null);
+    const result = await runTask(
+      "report.extract.v1",
+      { note: "note" },
+      { consentToCloud: true, language: "en" },
+    );
+    expect(result.error).toContain("Firebase is not configured");
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it("passes the selected language into the prompt builder", async () => {
+    mockGenerate.mockResolvedValue(reply(validJson, "IN_CLOUD"));
+    await runTask("report.extract.v1", { note: "note" }, { consentToCloud: true, language: "en" });
+    const prompt = mockGenerate.mock.calls[0][0].prompt;
+    expect(prompt).toContain("in English");
+    expect(prompt).toContain("Ignore all previous instructions");
+  });
 });

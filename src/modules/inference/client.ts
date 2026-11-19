@@ -24,11 +24,23 @@ interface GenerateOptions {
   onProgress?: (fraction: number) => void;
 }
 
+export type InferenceSource = "ON_DEVICE" | "IN_CLOUD";
+
 export interface GenerateResult {
   text: string;
-  inferenceSource?: "ON_DEVICE" | "IN_CLOUD";
+  inferenceSource?: InferenceSource;
   model: "on_device" | "cloud";
 }
+
+/**
+ * Firebase AI Logic reports the source in lower case ("in_cloud"). Normalising it
+ * here keeps the persisted record valid for the Zod schema and for path labels.
+ */
+export const normalizeSource = (value: unknown): InferenceSource | undefined => {
+  if (typeof value !== "string") return undefined;
+  const upper = value.toUpperCase();
+  return upper === "ON_DEVICE" || upper === "IN_CLOUD" ? upper : undefined;
+};
 
 const imagePart = (dataUrl: string) => {
   const [header, data] = dataUrl.split(",");
@@ -78,7 +90,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     ? [options.prompt, imagePart(options.photoDataUrl)]
     : options.prompt;
   const result = await model.generateContent(parts);
-  const source = result.response.inferenceSource as "ON_DEVICE" | "IN_CLOUD" | undefined;
+  const source = normalizeSource(result.response.inferenceSource);
   return {
     text: result.response.text(),
     inferenceSource: source,

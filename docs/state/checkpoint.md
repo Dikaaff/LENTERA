@@ -1,13 +1,13 @@
 # Checkpoint
 
-Updated: 2026-11-13 (session 3)
+Updated: 2026-11-19 (session 5)
 
 State: **DEPLOYED — CLOUD MEASURED — LIVE SAVE VERIFIED**
 
 - Live URL: <https://lentera-6f2a-db3a1.web.app>
 - Firebase project: `lentera-6f2a-db3a1` (number `1028167597621`).
 - Firestore `(default)` is in `asia-southeast2`; rules and Hosting are released.
-- 44 unit tests, 11 emulator rules tests, typecheck, boundaries, production
+- 53 unit tests, 11 emulator rules tests, typecheck, boundaries, production
   build, browser walkthrough, and queued-report resume pass.
 - 36/36 cloud extraction calls succeeded; schema valid 100%, field accuracy
   87.5% (21/24), avg 2,603 ms, p95 6,033 ms, all `in_cloud`.

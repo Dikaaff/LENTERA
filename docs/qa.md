@@ -1,15 +1,15 @@
 # QA record
 
-Date: 2026-11-13.
+Date: 2026-11-19.
 
 ## Commands actually run
 
 | Command                         | Result                                | Evidence                          |
 | ------------------------------- | ------------------------------------- | --------------------------------- |
 | `npm run typecheck`             | pass, 0 errors                        | exit 0                            |
-| `npm run test`                  | 7 files, 44 unit tests passed         | Vitest output                     |
+| `npm run test`                  | 7 files, 53 unit tests passed         | Vitest output                     |
 | `npm run test:rules`            | 11 emulator rules tests passed        | Firestore emulator + Vitest       |
-| `npm run boundaries`            | 0 violations, 57 modules              | dependency-cruiser                |
+| `npm run boundaries`            | 0 violations, 66 modules              | dependency-cruiser                |
 | `npm run build`                 | pass; PWA precache 9 entries          | `dist/`                           |
 | `npm run dev` + headless Chrome | HTTP 200; four tabs render            | DOM dump                          |
 | emulator E2E walkthrough        | capture → queue → sync → reload → map | `docs/evidence/e2e-*.png`         |
@@ -18,7 +18,8 @@ Date: 2026-11-13.
 | `npm run measure:cloud`         | 36/36 ok; schema 1.0; accuracy 0.875  | `docs/prompts/cloud-metrics.json` |
 | `bash scripts/deploy.sh <id>`   | exit 0; rules + hosting released      | `/tmp/deploy-real.log`            |
 | live URL smoke                  | `/` and `/antrean` HTTP 200           | `docs/evidence/deploy-live.png`   |
-| live security headers           | all configured headers present        | `curl -I` output                  |     | live sign-in + save | RELAWAN → `terkirim` → reload | `docs/evidence/live-terkirim.png` |
+| live security headers           | all configured headers present        | `curl -I` output                  |
+| live sign-in + save             | RELAWAN → `terkirim` → reload         | `docs/evidence/live-terkirim.png` |
 
 ## What the tests cover
 
@@ -28,6 +29,9 @@ Date: 2026-11-13.
   data untouched.
 - Prompt injection defense present verbatim; all four adversarial fixtures and a
   long note stay under 2,600 estimated tokens; 12-case tables exist.
+- Language: the extraction prompt switches to English few-shots and an English
+  output instruction; cluster `reason` and SITREP claim text receive an explicit
+  English instruction; inference rejection reasons are localized.
 - Routing: local default, cloud retry after invalid local output, over-budget
   note goes straight to cloud, no-consent downgrade, cloud-only refusal.
 - Queue survives a module reload; same-ID write does not duplicate; a remote
@@ -110,8 +114,10 @@ camera=(self), microphone=(), geolocation=()`, and HSTS.
   (`JALUR: MANUAL`), not Nano or cloud.
 - No Nano call or screenshot; no Chrome 139+ profile.
 - No two-device conflict reproduction; conflict logic is unit-tested only.
-- No reCAPTCHA Enterprise site key or App Check enforcement. AI Logic answered
-  without App Check, so this is not currently blocking cloud calls.
+- App Check enforcement is not verified. The client initializes reCAPTCHA
+  Enterprise when the site key is present, but the Firebase CLI credentials in
+  this session are invalid, so the console state could not be read or changed.
+  Earlier cloud calls answered without attestation.
 - `sitrep.cluster.v1` and `sitrep.daily.v1` are still unmeasured.
 
 ## Gate status

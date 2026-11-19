@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
+import { useLanguage, type TranslationKey } from "@/lib/i18n";
+import { localeFor } from "@/lib/language";
 import { runTask } from "@/modules/inference";
 import { useReports } from "@/modules/queue";
 import type { ClusterResult, SitrepResult } from "@/modules/reports";
@@ -16,14 +18,15 @@ import {
   WORD_LIMIT,
 } from "@/modules/sitrep";
 
-const HEADING: Record<string, string> = {
-  overview: "Ringkasan",
-  most_urgent: "Kebutuhan paling mendesak",
-  affected: "Wilayah paling terdampak",
-  gaps: "Celah data",
+const HEADING: Record<string, TranslationKey> = {
+  overview: "heading.overview",
+  most_urgent: "heading.most_urgent",
+  affected: "heading.affected",
+  gaps: "heading.gaps",
 };
 
 export function SitrepScreen() {
+  const { language, t } = useLanguage();
   const consent = useConsent();
   const reports = useReports();
   const [cluster, setCluster] = useState<ClusterResult | null>(null);
@@ -55,10 +58,10 @@ export function SitrepScreen() {
     const result = await runTask(
       "sitrep.cluster.v1",
       { reports: sanitized },
-      { consentToCloud: true },
+      { consentToCloud: true, language },
     );
     if (result.status === "ok" && result.data) setCluster(result.data);
-    else setError(result.error ?? "Deduplikasi gagal. Coba lagi saat jaringan stabil.");
+    else setError(result.error ?? t("sitrep.errorDedupe"));
     setBusy(false);
   };
 
@@ -69,28 +72,24 @@ export function SitrepScreen() {
     const result = await runTask(
       "sitrep.daily.v1",
       { reports: sanitized, aggregates: aggregate },
-      { consentToCloud: true },
+      { consentToCloud: true, language },
     );
     if (result.status === "ok" && result.data) setSitrep(result.data);
-    else setError(result.error ?? "SITREP gagal disusun. Tidak ada klaim yang ditampilkan.");
+    else setError(result.error ?? t("sitrep.errorGenerate"));
     setBusy(false);
   };
 
   if (!consent) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-bold tracking-tight">SITREP</h1>
+        <h1 className="text-xl font-bold tracking-tight">{t("sitrep.title")}</h1>
         <Card className="border-amber/60">
           <CardBody className="space-y-3">
             <p className="flex items-center gap-2 text-sm font-semibold text-amber">
-              <ShieldCheck className="size-4" /> Persetujuan cloud diperlukan
+              <ShieldCheck className="size-4" /> {t("sitrep.consentTitle")}
             </p>
-            <p className="text-sm text-muted">
-              Deduplikasi dan SITREP berjalan di cloud. Laporan yang dikirim sudah disamarkan: nama
-              dan nomor telepon pelapor diganti token. Data korban dan lokasi tetap menjadi isi
-              laporan.
-            </p>
-            <Button onClick={() => setConsent(true)}>Setujui dan lanjutkan</Button>
+            <p className="text-sm text-muted">{t("sitrep.consentText")}</p>
+            <Button onClick={() => setConsent(true)}>{t("sitrep.consentButton")}</Button>
           </CardBody>
         </Card>
       </div>
@@ -103,10 +102,8 @@ export function SitrepScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold tracking-tight">SITREP</h1>
-        <p className="mt-1 text-sm text-muted">
-          {sanitized.length} laporan tersanitasi siap dikirim ke cloud.
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">{t("sitrep.title")}</h1>
+        <p className="mt-1 text-sm text-muted">{t("sitrep.ready", { count: sanitized.length })}</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
@@ -116,10 +113,10 @@ export function SitrepScreen() {
           disabled={busy || sanitized.length === 0}
           onClick={() => void dedupe()}
         >
-          <ClipboardList className="size-4" /> Deduplikasi
+          <ClipboardList className="size-4" /> {t("sitrep.dedupe")}
         </Button>
         <Button size="sm" disabled={busy || sanitized.length === 0} onClick={() => void generate()}>
-          {busy ? <Loader2 className="size-4 animate-spin" /> : null} Susun SITREP
+          {busy ? <Loader2 className="size-4 animate-spin" /> : null} {t("sitrep.generate")}
         </Button>
       </div>
 
@@ -133,10 +130,10 @@ export function SitrepScreen() {
         <Card>
           <CardBody className="space-y-2">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-amber">
-              Kandidat duplikat
+              {t("sitrep.duplicates")}
             </h2>
             {cluster.clusters.length === 0 && (
-              <p className="text-sm text-muted">Tidak ada duplikat.</p>
+              <p className="text-sm text-muted">{t("sitrep.noDuplicates")}</p>
             )}
             {cluster.clusters.map((item) => (
               <div key={item.canonical_id} className="border border-line p-2 text-xs">
@@ -151,9 +148,7 @@ export function SitrepScreen() {
                 </div>
                 <p className="mt-1 text-muted">{item.reason}</p>
                 {item.confidence < 0.6 && (
-                  <p className="mt-1 text-emergency">
-                    Di bawah 0,6 — perlu ditinjau manusia, belum diterapkan.
-                  </p>
+                  <p className="mt-1 text-emergency">{t("sitrep.lowConfidence")}</p>
                 )}
               </div>
             ))}
@@ -164,14 +159,16 @@ export function SitrepScreen() {
       {sitrep && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs text-muted">
-            <span className="tabular-nums">{words} kata</span>
-            {words > WORD_LIMIT && <Badge tone="danger">melebihi {WORD_LIMIT} kata</Badge>}
+            <span className="tabular-nums">{t("sitrep.words", { count: words })}</span>
+            {words > WORD_LIMIT && (
+              <Badge tone="danger">{t("sitrep.overLimit", { limit: WORD_LIMIT })}</Badge>
+            )}
           </div>
           {sitrep.sections.map((section) => (
             <Card key={section.heading}>
               <CardBody className="space-y-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-amber">
-                  {HEADING[section.heading] ?? section.heading}
+                  {t(HEADING[section.heading] ?? "heading.overview")}
                 </h2>
                 {section.claims.map((claim, index) => (
                   <p key={index} className="text-sm leading-relaxed">
@@ -182,7 +179,7 @@ export function SitrepScreen() {
                         type="button"
                         onClick={() => setSourceId(id)}
                         className="min-h-6 border-b border-amber font-mono text-[11px] text-amber"
-                        aria-label={`Buka sumber ${id}`}
+                        aria-label={t("sitrep.source", { id })}
                       >
                         {id.slice(0, 8)}
                       </button>
@@ -193,7 +190,10 @@ export function SitrepScreen() {
             </Card>
           ))}
           <p className="text-[11px] text-muted">
-            {claimsWithSources(sitrep).length} klaim bersumber dari {sanitized.length} laporan.
+            {t("sitrep.claimsFrom", {
+              claims: claimsWithSources(sitrep).length,
+              reports: sanitized.length,
+            })}
           </p>
         </div>
       )}
@@ -202,14 +202,15 @@ export function SitrepScreen() {
         <Card className="border-amber/50">
           <CardBody className="space-y-1">
             <div className="flex items-center justify-between">
-              <Badge tone="amber">Sumber {source.id.slice(0, 8)}</Badge>
+              <Badge tone="amber">{t("sitrep.source", { id: source.id.slice(0, 8) })}</Badge>
               <Button size="sm" variant="ghost" onClick={() => setSourceId(null)}>
-                Tutup
+                {t("sitrep.close")}
               </Button>
             </div>
-            <p className="text-sm">{source.extraction.summary ?? "Tanpa ringkasan."}</p>
+            <p className="text-sm">{source.extraction.summary ?? t("sitrep.noSummary")}</p>
             <p className="text-xs text-muted">
-              {source.region} · {source.post} · {new Date(source.createdAt).toLocaleString("id-ID")}
+              {source.region} · {source.post} ·{" "}
+              {new Date(source.createdAt).toLocaleString(localeFor(language))}
             </p>
           </CardBody>
         </Card>

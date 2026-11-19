@@ -7,6 +7,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Input, Label, Select, Textarea } from "@/components/ui/field";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { deviceId } from "@/lib/device";
+import { useLanguage } from "@/lib/i18n";
 import { ensureVolunteer, useAuthUser } from "@/modules/auth";
 import { runTask, type InferenceResult } from "@/modules/inference";
 import { regions } from "@/modules/map/geometry";
@@ -22,13 +23,14 @@ import { setConsent, useConsent } from "@/modules/sitrep";
 const MAX_PHOTO = 1_400_000;
 
 export function CaptureScreen() {
+  const { language, t } = useLanguage();
   const consent = useConsent();
   const { user } = useAuthUser();
   const fileRef = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [region, setRegion] = useState(regions[0]?.name ?? "");
-  const [post, setPost] = useState("Pos Lapangan");
+  const [post, setPost] = useState(() => t("capture.defaultPost"));
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [askConsent, setAskConsent] = useState(false);
@@ -41,11 +43,11 @@ export function CaptureScreen() {
   const readPhoto = (file: File | undefined) => {
     if (!file) return;
     if (!/image\/(jpeg|png)/.test(file.type)) {
-      setMessage("Foto harus JPEG atau PNG.");
+      setMessage(t("capture.photoTypeError"));
       return;
     }
     if (file.size > MAX_PHOTO) {
-      setMessage("Foto terlalu besar. Maksimal 1,4 MB agar antrean tetap ringan.");
+      setMessage(t("capture.photoSizeError"));
       return;
     }
     const reader = new FileReader();
@@ -65,7 +67,7 @@ export function CaptureScreen() {
       result = await runTask(
         "report.extract.v1",
         { note: masked, photoDataUrl: photo },
-        { consentToCloud: allowCloud, onProgress: setProgress },
+        { consentToCloud: allowCloud, onProgress: setProgress, language },
       );
     } catch {
       result = {
@@ -76,31 +78,28 @@ export function CaptureScreen() {
           durationMs: 0,
           artifact: "report.extract.v1",
           version: "1.0.0",
-          reason: "Pemrosesan gagal dijalankan.",
+          reason: t("capture.processFailed"),
           retried: false,
         },
-        error: "Pemrosesan gagal dijalankan.",
+        error: t("capture.processFailed"),
       };
     }
     setInference(result.meta);
     if (result.status === "ok" && result.data) {
       setExtraction(result.data);
       setNeedsReview(false);
-      setMessage("Ekstraksi selesai. Periksa setiap kolom sebelum disimpan.");
+      setMessage(t("capture.extractionDone"));
     } else {
       setExtraction(EMPTY_EXTRACTION);
       setNeedsReview(true);
-      setMessage(
-        result.error ??
-          "Hasil model belum tervalidasi. Isi kolom manual; catatan aslimu tidak hilang.",
-      );
+      setMessage(result.error ?? t("capture.extractionUnverified"));
     }
     setBusy(false);
   };
 
   const submit = () => {
     if (!note.trim()) {
-      setMessage("Tulis catatan lapangan dulu.");
+      setMessage(t("capture.noteRequired"));
       return;
     }
     if (!consent && isFirebaseConfigured) {
@@ -117,7 +116,7 @@ export function CaptureScreen() {
       durationMs: 0,
       artifact: "report.extract.v1",
       version: "1.0.0",
-      reason: "Diisi manual oleh relawan.",
+      reason: t("capture.manualReason"),
       retried: false,
     };
     const volunteer = isFirebaseConfigured ? await ensureVolunteer() : null;
@@ -136,44 +135,41 @@ export function CaptureScreen() {
     setPhoto(null);
     setExtraction(null);
     setInference(null);
-    setMessage("Laporan masuk antrean lokal. Aman sampai jaringan kembali.");
+    setMessage(t("capture.savedMessage"));
   };
 
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold tracking-tight">Isi Laporan</h1>
-        <p className="mt-1 text-sm text-muted">
-          Tulis apa adanya. Proses tetap jalan tanpa jaringan.
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">{t("capture.title")}</h1>
+        <p className="mt-1 text-sm text-muted">{t("capture.subtitle")}</p>
       </header>
 
       {!isFirebaseConfigured && (
         <p className="flex items-start gap-2 border border-amber/50 p-3 text-xs text-amber">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-          Firebase belum dikonfigurasi. AI dan sinkronisasi nonaktif; kamu tetap bisa mengisi dan
-          menyimpan laporan secara lokal.
+          {t("capture.firebaseWarning")}
         </p>
       )}
 
       <Card>
         <CardBody className="space-y-3">
           <label className="block">
-            <Label>Catatan lapangan</Label>
+            <Label>{t("capture.noteLabel")}</Label>
             <Textarea
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Contoh: Ada 30 keluarga di balai desa Sukamaju, butuh air bersih dan selimut. Jalan longsor."
+              placeholder={t("capture.notePlaceholder")}
             />
           </label>
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <Label>Pos</Label>
+              <Label>{t("capture.postLabel")}</Label>
               <Input value={post} onChange={(event) => setPost(event.target.value)} />
             </label>
             <label className="block">
-              <Label>Wilayah</Label>
+              <Label>{t("capture.regionLabel")}</Label>
               <Select value={region} onChange={(event) => setRegion(event.target.value)}>
                 {regions.map((item) => (
                   <option key={item.name} value={item.name}>
@@ -193,13 +189,17 @@ export function CaptureScreen() {
           />
           <div className="flex items-center gap-3">
             <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()}>
-              <Camera className="size-4" /> Foto (JPEG/PNG)
+              <Camera className="size-4" /> {t("capture.photo")}
             </Button>
             {photo && (
               <>
-                <img src={photo} alt="Pratinjau foto laporan" className="size-11 object-cover" />
+                <img
+                  src={photo}
+                  alt={t("capture.photoPreviewAlt")}
+                  className="size-11 object-cover"
+                />
                 <Button variant="ghost" size="sm" onClick={() => setPhoto(null)}>
-                  Hapus foto
+                  {t("capture.removePhoto")}
                 </Button>
               </>
             )}
@@ -207,7 +207,9 @@ export function CaptureScreen() {
 
           <Button className="w-full" disabled={busy} onClick={submit}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-            {busy ? `Memproses… ${Math.round(progress * 100)}%` : "Proses laporan"}
+            {busy
+              ? t("capture.processing", { percent: Math.round(progress * 100) })
+              : t("capture.submit")}
           </Button>
         </CardBody>
       </Card>
@@ -215,13 +217,10 @@ export function CaptureScreen() {
       {askConsent && (
         <Card className="border-amber/60">
           <CardBody className="space-y-3">
-            <p className="text-sm">
-              Model di perangkat tidak tersedia. Laporan yang sudah disamarkan akan dikirim ke
-              server Google untuk diproses. Setujui?
-            </p>
+            <p className="text-sm">{t("capture.consentText")}</p>
             <div className="flex gap-2">
               <Button size="sm" onClick={() => void process(true)}>
-                Izinkan cloud
+                {t("capture.consentAllow")}
               </Button>
               <Button
                 size="sm"
@@ -231,7 +230,7 @@ export function CaptureScreen() {
                   void process(false);
                 }}
               >
-                Proses lokal saja
+                {t("capture.consentLocal")}
               </Button>
             </div>
           </CardBody>
@@ -243,13 +242,13 @@ export function CaptureScreen() {
           {message}
         </p>
       )}
-      {savedId && <Badge tone="synced">Tersimpan lokal · {savedId.slice(0, 8)}</Badge>}
+      {savedId && <Badge tone="synced">{t("capture.saved", { id: savedId.slice(0, 8) })}</Badge>}
 
       {extraction && (
         <>
           <ExtractionCard value={extraction} onChange={setExtraction} />
           <Button className="w-full" onClick={() => void save()}>
-            Simpan ke antrean
+            {t("capture.save")}
           </Button>
         </>
       )}

@@ -1,6 +1,8 @@
 import { getFirebaseApp } from "@/lib/firebase";
+import type { Language } from "@/lib/language";
 import type { InferenceMeta } from "@/modules/reports";
 import { generate } from "./client";
+import { messagesFor } from "./messages";
 import { setLastRun } from "./status";
 import {
   TASKS,
@@ -15,6 +17,7 @@ import { ON_DEVICE_CEILING, estimateTokens } from "./token";
 export interface RunOptions {
   consentToCloud?: boolean;
   forceCloud?: boolean;
+  language?: Language;
   onProgress?: (fraction: number) => void;
 }
 
@@ -89,8 +92,10 @@ export async function runTask<K extends TaskName>(
   options: RunOptions = {},
 ): Promise<InferenceResult<TaskOutputs[K]>> {
   const started = performance.now();
+  const language = options.language ?? "id";
+  const msg = messagesFor(language);
   const task = TASKS[taskName];
-  const prompt = task.build(input);
+  const prompt = task.build(input, language);
   const photo =
     taskName === "report.extract.v1"
       ? ((input as TaskInputs["report.extract.v1"]).photoDataUrl ?? null)
@@ -98,38 +103,30 @@ export async function runTask<K extends TaskName>(
   const tokens = estimateTokens(prompt) + (photo ? 900 : 0);
 
   let mode = task.mode;
-  let reason = task.reason;
+  let reason = task.reason[language];
   if (taskName === "report.extract.v1" && tokens > ON_DEVICE_CEILING) {
     mode = "ONLY_IN_CLOUD";
-    reason = `Input ${tokens} token melewati batas ${ON_DEVICE_CEILING}; langsung ke cloud.`;
+    reason = msg.overBudget(tokens, ON_DEVICE_CEILING);
   }
   if (options.forceCloud) {
     mode = "ONLY_IN_CLOUD";
-    reason = "Pengguna memilih pemrosesan cloud.";
+    reason = msg.forcedCloud;
   }
   if (!options.consentToCloud && mode === "PREFER_ON_DEVICE") {
     mode = "ONLY_ON_DEVICE";
-    reason += " Lokal saja sampai persetujuan cloud diberikan.";
+    reason += msg.localOnlySuffix;
   }
 
   if (import.meta.env.VITE_DISABLE_AI === "1") {
-    return unavailable(
-      "AI dinonaktifkan untuk uji lokal. Isi kolom manual; catatan tetap tersimpan.",
-      started,
-      taskName,
-    );
+    return unavailable(msg.aiDisabled, started, taskName);
   }
 
   const cloudOnly = mode === "ONLY_IN_CLOUD" || mode === "PREFER_IN_CLOUD";
   if (cloudOnly && !options.consentToCloud) {
-    return unavailable("Persetujuan cloud belum diberikan.", started, taskName);
+    return unavailable(msg.consentMissing, started, taskName);
   }
   if (!getFirebaseApp()) {
-    return unavailable(
-      "Firebase belum dikonfigurasi. Isi VITE_FIREBASE_* untuk mengaktifkan AI.",
-      started,
-      taskName,
-    );
+    return unavailable(msg.firebaseMissing, started, taskName);
   }
 
   try {
@@ -162,7 +159,7 @@ export async function runTask<K extends TaskName>(
         const value = meta(
           taskName,
           "ONLY_IN_CLOUD",
-          "Validasi lokal gagal; satu percobaan ulang di cloud.",
+          msg.localRetry,
           started,
           retry.inferenceSource,
           true,
@@ -173,7 +170,7 @@ export async function runTask<K extends TaskName>(
       const value = meta(
         taskName,
         "ONLY_IN_CLOUD",
-        "Validasi lokal dan cloud gagal; hasil disimpan untuk ditinjau.",
+        msg.bothFailed,
         started,
         retry.inferenceSource,
         true,
@@ -182,18 +179,11 @@ export async function runTask<K extends TaskName>(
       return { status: "unverified", data: null, meta: value, rawText: retry.text };
     }
 
-    const value = meta(
-      taskName,
-      mode,
-      "Validasi gagal dan cloud tidak diizinkan; hasil disimpan untuk ditinjau.",
-      started,
-      first.inferenceSource,
-      false,
-    );
+    const value = meta(taskName, mode, msg.localOnlyFailed, started, first.inferenceSource, false);
     setLastRun(value);
     return { status: "unverified", data: null, meta: value, rawText: first.text };
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "Model tidak tersedia.";
+    const detail = error instanceof Error ? error.message : msg.modelUnavailable;
     return unavailable(detail, started, taskName);
   }
 }
