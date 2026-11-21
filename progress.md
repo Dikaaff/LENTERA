@@ -176,6 +176,8 @@ WORKSPACE_LOG: stage4 began.
       deleted; demo media kept locally.
 - [x] `npm run check`: 53 unit tests pass, typecheck and boundaries clean;
       `npm run build` passes.
-- [ ] Deploy the new bundle (blocked: Firebase CLI credentials invalid).
-- [ ] Set App Check to Enforced (blocked: same credentials).
+- [x] Deploy the new bundle: hosting and rules released to
+      `lentera-6f2a-db3a1`; live `/assets/index-CcWRkYlQ.js` contains the English
+      login copy and the "no shared access code" note, with no PIN logic.
+- [ ] Set App Check to Enforced (manual console step; verify tokens first).
 - [ ] Record the video and submit on Devpost (manual).
