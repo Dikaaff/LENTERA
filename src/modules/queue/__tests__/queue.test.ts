@@ -36,6 +36,7 @@ beforeEach(() => {
 });
 
 describe("queue", () => {
+  // Cold import of the Firebase SDK is slow on CI laptops; the assertion is cheap.
   it("survives a reload with the same report", async () => {
     const first = await import("../index");
     first.saveReport(input);
@@ -44,7 +45,7 @@ describe("queue", () => {
     const store = await import("../store");
     expect(store.allReports()).toHaveLength(1);
     expect(store.allReports()[0].rawNote).toBe(input.rawNote);
-  });
+  }, 20000);
 
   it("updates by id instead of duplicating a retry", async () => {
     const store = await import("../store");
